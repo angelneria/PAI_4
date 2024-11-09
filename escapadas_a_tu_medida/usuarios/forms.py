@@ -13,6 +13,10 @@ class FormularioRegistroUsuario(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password']
+        labels = {
+            'email': 'Correo', 
+            'username': 'Nombre de usuario', # Cambia la etiqueta del campo "email" a "Correo"
+        }
 
     def clean_confirmar_password(self):
         password = self.cleaned_data.get("password")
