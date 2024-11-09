@@ -4,19 +4,124 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
+    <!-- Estilos en línea para personalizar la página -->
+    <style>
+        /* Estilo general */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #dfece0; /* Fondo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Contenedor del formulario */
+        .login-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px; /* Ancho máximo para pantallas grandes */
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Efecto de profundidad al pasar el ratón */
+        .login-container:hover {
+            transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2); /* Más sombra */
+        }
+
+        /* Estilo de los encabezados */
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo del formulario */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; /* Asegura que los elementos ocupen el 100% del ancho */
+        }
+
+        /* Estilo de las etiquetas */
+        label {
+            text-align: left;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block; /* Asegura que la etiqueta se muestre como bloque */
+            font-size: 16px;
+        }
+
+        /* Estilo de los campos del formulario */
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%; /* Hace que los campos ocupen el 100% del ancho */
+            box-sizing: border-box; /* Asegura que el padding no afecte al tamaño total */
+            text-align: left; /* Alinea el texto dentro de los campos a la izquierda */
+        }
+
+        /* Botón de login */
+        button[type="submit"] {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Hace que el botón ocupe el 100% del ancho */
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilo para los mensajes */
+        .messages {
+            color: #ff3333;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* Media query para pantallas pequeñas (móviles) */
+        @media (max-width: 600px) {
+            .login-container {
+                max-width: 90%; /* Ajusta el tamaño del contenedor a un 90% del ancho de la pantalla */
+                padding: 20px; /* Reduce el espacio de relleno */
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Iniciar Sesión</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Iniciar Sesión</button>
-    </form>
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }} <!-- Los campos de usuario y contraseña se generarán aquí automáticamente -->
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+
+        <!-- Mostrar mensajes de éxito o error -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
