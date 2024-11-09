@@ -1,0 +1,11 @@
+<!-- buscar.html -->
+<h1>Resultados de búsqueda</h1>
+<p>Resultados para: "{{ query }}"</p>
+
+<ul>
+    {% for propiedad in resultados %}
+        <li>{{ propiedad.titulo }} - {{ propiedad.descripcion }}</li>
+    {% empty %}
+        <p>No se encontraron resultados.</p>
+    {% endfor %}
+</ul>
