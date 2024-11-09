@@ -67,18 +67,44 @@
     <div class="header">
         <h1>Escapadas a tu medida</h1>
         <nav>
-            <a href="/login/">Login</a>
-            <a href="/registro/">Registro</a>
+            {% if user.is_authenticated %}
+                <a href="/perfil/">{{ user.username }}</a>
+                <!-- Botón de cierre de sesión -->
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Cerrar sesión</button>
+                </form>
+            {% else %}
+                <a href="/login/">Login</a>
+                <a href="/registro/">Registro</a>
+            {% endif %}
         </nav>
     </div>
+    <form action="{% url 'buscar' %}" method="get" class="search-form">
+        <input type="text" name="query" placeholder="Buscar alojamientos..." required>
+        <button type="submit">Buscar</button>
+    </form>
+    
     <div class="container">
         <div class="dropdown">
-            <button class="dropdown-toggle">Pepe</button>
-            <div class="dropdown-content">
-                <a href="/listaDeseos">Lista de deseos</a>
-                <a href="/seguimientoReservas">Seguimiento de reservas</a>
-                <a href="/historialReservas">Historial de reservas</a>
-            </div>
+            {% if user.is_authenticated  %}
+            <button class="dropdown-toggle">Opciones</button>
+            
+                {% if perfil_usuario.tipo_usuario == 'inquilino'  %}
+                    <div class="dropdown-content">
+                        <a href="/listaDeseos">Lista de deseos</a>
+                        <a href="/chat">Chat</a>
+                    </div>
+                {% endif %}
+                {% if perfil_usuario.tipo_usuario == 'anfitrion'  %}
+                    <div class="dropdown-content">
+                        <a href="/historialReserva">Historial de reservas</a>
+                        <a href="/chat">Chat</a>
+                        <a href="/gestionPropiedad">Gestión de propiedades</a>
+                    </div>
+                {% endif %}
+
+            {% endif %}
         </div>
         
         <main class="main-content">

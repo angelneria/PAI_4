@@ -1,7 +1,7 @@
 # usuarios/views.py
 
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from .forms import FormularioRegistroUsuario, FormularioInicioSesion
 from .models import PerfilUsuario
@@ -24,7 +24,7 @@ def registro(request):
             login(request, usuario)
             messages.success(request, "Registro exitoso. ¡Bienvenido!")
             # Redirige a la página inicial según el tipo de usuario
-            return redirect("listar_propiedades")
+            return redirect("/")
     else:
         form = FormularioRegistroUsuario()
     
@@ -50,4 +50,9 @@ def iniciar_sesion(request):
     else:
         form = FormularioInicioSesion()
     return render(request, "usuarios/iniciar_sesion.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)  # Esto cierra solo la sesión del usuario actual
+    return redirect('/')  # Redirige a la página principal u otra URL que prefieras
 
