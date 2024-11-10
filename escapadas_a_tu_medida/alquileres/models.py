@@ -14,8 +14,6 @@ class Propiedad(models.Model):
     precio_por_noche = models.DecimalField(max_digits=10, decimal_places=2)
     disponible = models.BooleanField(default=True)
     
-    # Eliminamos el campo ManyToManyField en Propiedad
-    # imagenes = models.ManyToManyField('Imagen', blank=True, related_name='propiedades')  # Esto ya no es necesario
 
     def __str__(self):
         return self.titulo

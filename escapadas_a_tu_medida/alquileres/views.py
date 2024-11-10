@@ -3,7 +3,10 @@ from .models import Propiedad, Reserva
 from usuarios.models import PerfilUsuario
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Propiedad  
+from .models import Propiedad, Imagen  
+from django.core.exceptions import PermissionDenied
+from .forms import PropiedadForm, ImagenFormSet
+from django.forms import modelformset_factory
 
 
 def home(request):
@@ -47,4 +50,31 @@ def buscar_alojamiento(request):
         resultados = Propiedad.objects.none()
 
     return render(request, 'buscar.html', {'resultados': resultados, 'query': query})
+
+
+
+@login_required
+def crear_propiedad(request):
+    if request.method == 'POST':
+        propiedad_form = PropiedadForm(request.POST)
+        imagen_formset = ImagenFormSet(request.POST, request.FILES)  # Importante pasar request.FILES
+        
+        if propiedad_form.is_valid() and imagen_formset.is_valid():
+            propiedad = propiedad_form.save(commit=False)
+            propiedad.propietario = request.user.perfilusuario  # Asocia la propiedad al anfitrión
+            propiedad.save()  # Guarda la propiedad en la base de datos
+            
+            # Asocia el formset de imágenes con la propiedad y guarda las imágenes
+            imagen_formset.instance = propiedad
+            imagen_formset.save()
+
+            return redirect('/', pk=propiedad.pk)  # Redirige al detalle de la propiedad creada
+    else:
+        propiedad_form = PropiedadForm()
+        imagen_formset = ImagenFormSet()
+
+    return render(request, 'alquileres/crear_propiedad.html', {
+        'propiedad_form': propiedad_form,
+        'imagen_formset': imagen_formset,
+    })
 
