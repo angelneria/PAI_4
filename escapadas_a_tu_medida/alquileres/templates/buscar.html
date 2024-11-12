@@ -1,11 +1,470 @@
-<!-- buscar.html -->
-<h1>Resultados de búsqueda</h1>
-<p>Resultados para: "{{ query }}"</p>
+<!DOCTYPE html>
+<html lang="es">
 
-<ul>
-    {% for propiedad in resultados %}
-        <li>{{ propiedad.titulo }} - {{ propiedad.descripcion }}</li>
-    {% empty %}
-        <p>No se encontraron resultados.</p>
-    {% endfor %}
-</ul>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de búsqueda</title>
+    <!-- Estilos de Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilos personalizados */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            color: inherit;
+            /* Hereda el color de texto del contenedor */
+            text-decoration: none;
+            /* Elimina el subrayado */
+            display: inline-block;
+            /* Hace que el margen inferior funcione en enlaces */
+        }
+
+
+        /* Estilos básicos para un diseño simple */
+
+        /* Cabecera principal */
+        .header {
+            background: linear-gradient(to left, #dfece0, #bcd5b0);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        /* Barra de navegación */
+        .header nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header form {
+            margin: 0;
+        }
+
+        /* Barra de búsqueda */
+        .search-form {
+            display: flex;
+            align-items: center;
+            margin-right: auto;
+        }
+
+        .search-input {
+            width: 800px;
+            height: 15px;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            font-size: 16px;
+        }
+
+        .search-button {
+            background-color: #6fbf73;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            height: 30px;
+            padding: 0 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .search-button:hover {
+            background-color: #4a9c5d;
+            /* Verde más oscuro al pasar el ratón */
+            transform: scale(1.05);
+            /* Ligeramente agrandar el botón para el efecto de interacción */
+        }
+
+        /* Estilo del panel lateral */
+        .side-panel {
+            position: fixed;
+            /* Fijo en la pantalla */
+            top: 0;
+            /* Desde la parte superior */
+            left: -100%;
+            /* Empujado fuera de la pantalla al inicio */
+            width: 300px;
+            /* Ancho del panel */
+            height: 100%;
+            /* Altura completa de la pantalla */
+            background-color: #333;
+            /* Fondo oscuro para el panel */
+            color: white;
+            /* Texto blanco */
+            transition: left 0.3s ease;
+            /* Transición suave para el movimiento */
+            padding: 20px;
+            /* Espaciado interno */
+            z-index: 1000;
+            /* Asegurarse de que esté encima de otros elementos */
+            display: flex;
+            /* Usamos flexbox para controlar la disposición */
+            flex-direction: column;
+            /* Apilar los elementos en una columna */
+            justify-content: flex-start;
+            /* Asegurarse que los elementos empiecen desde arriba */
+            align-items: stretch;
+            /* Asegurar que los elementos estiren al 100% de ancho */
+            box-sizing: border-box;
+            /* Incluir el padding y los bordes en el cálculo de ancho */
+        }
+
+        /* Estilo del contenedor de navegación dentro del panel lateral */
+        .side-panel nav {
+            display: flex;
+            /* Flexbox para alinear los elementos */
+            flex-direction: column;
+            /* Los enlaces se apilan verticalmente */
+            width: 100%;
+            /* Asegurarse que el contenedor ocupe todo el ancho disponible */
+            align-items: stretch;
+            /* Los enlaces deben estirarse para ocupar todo el ancho */
+            margin-top: 50px;
+        }
+
+        /* Estilo para los enlaces dentro del panel lateral */
+        .side-panel nav a {
+            display: block;
+            /* Los enlaces son bloques, ocupando toda la línea */
+            width: 100%;
+            /* Los enlaces ocuparán todo el ancho disponible */
+            color: white;
+            margin: 5px 0;
+            /* Espaciado vertical entre los enlaces (reducción del margen) */
+            text-decoration: none;
+            /* Eliminar subrayado */
+            font-size: 18px;
+            padding: 15px;
+            /* Añadir relleno para hacer cada enlace más grande */
+            border-radius: 10px;
+            /* Bordes redondeados */
+            background-color: #333;
+            /* Fondo gris oscuro por defecto */
+            transition: background-color 0.3s ease;
+            /* Transición suave para el cambio de color */
+            box-sizing: border-box;
+            /* Incluir el padding y los bordes en el cálculo del ancho */
+
+        }
+
+        /* Efecto al pasar el ratón sobre los enlaces */
+        .side-panel nav a:hover {
+            background-color: #6fbf73;
+            /* Fondo verde claro cuando se pasa el ratón */
+        }
+
+
+        /* Estilo del botón de cerrar (X) */
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            /* Arriba */
+            right: 10px;
+            /* A la derecha */
+            background: none;
+            /* Sin fondo */
+            border: none;
+            /* Sin borde */
+            color: white;
+            /* Texto blanco */
+            font-size: 30px;
+            /* Tamaño grande para la X */
+            border-radius: 10px;
+            /* Bordes redondeados */
+
+            cursor: pointer;
+            /* Cambiar a cursor pointer */
+            padding: 5px 10px;
+            /* Espaciado alrededor de la X */
+            transition: background-color 0.3s ease;
+            /* Transición para el cambio de color */
+        }
+
+        /* Efecto al pasar el ratón sobre el botón de cerrar */
+        .close-panel:hover {
+            background-color: #6fbf73;
+            /* Fondo semi-transparente al pasar el ratón */
+        }
+
+        /* Mostrar el panel lateral cuando el checkbox esté marcado */
+        .panel-toggle:checked+.dropdown-toggle+.side-panel {
+            left: 0;
+            /* Mover el panel hacia la izquierda */
+        }
+
+        .filter-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Estilos para el ícono de apertura */
+        .dropdown-toggle {
+            background-color: #6fbf73;
+            /* Verde similar al botón de búsqueda */
+            color: white;
+            /* Texto blanco */
+            border: none;
+            /* Sin borde */
+            padding: 10px 20px;
+            /* Relleno interno (espaciado) */
+            font-size: 24px;
+            /* Tamaño grande para el ícono ≡ */
+            border-radius: 25px;
+            /* Bordes redondeados */
+            cursor: pointer;
+            /* Cursor en forma de puntero */
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            /* Transición suave */
+        }
+
+        /* Efecto al pasar el ratón sobre el botón */
+        .dropdown-toggle:hover {
+            background-color: #4a9c5d;
+            /* Verde más oscuro al pasar el ratón */
+            transform: scale(1.05);
+            /* Aumentar ligeramente el tamaño del botón */
+        }
+
+        /* Ocultar el checkbox visualmente pero mantener su funcionalidad */
+        .panel-toggle {
+            display: none;
+            /* Esconde el checkbox */
+        }
+
+        /* Contenedor del menú de filtros (oculto por defecto) */
+        .filter-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            /* Coloca el menú justo debajo del botón de filtro */
+            right: 0;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 250px;
+        }
+
+        /* Estilo del formulario oculto */
+        .filter-form {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            min-width: 250px;
+            top: 40px;
+            right: 0;
+        }
+
+        .filter-form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .filter-form input,
+        .filter-form select {
+            width: 90%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .filter-form button {
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* Estilos para la lista de propiedades */
+        .result-list {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 0;
+        }
+
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #4a9c5d;
+        }
+
+        .card-text {
+            font-size: 1em;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        {% if user.is_authenticated %}
+        <div class="dropdown">
+            <!-- Checkbox para abrir y cerrar el panel lateral -->
+            <input type="checkbox" id="panelToggle" class="panel-toggle">
+            <label for="panelToggle" class="dropdown-toggle">≡</label>
+
+            {% if perfil_usuario.tipo_usuario == 'inquilino' %}
+            <!-- Panel lateral para el tipo de usuario inquilino -->
+            <div class="side-panel">
+                <!-- Botón de cerrar (X) en la parte superior derecha -->
+                <button class="close-panel"
+                    onclick="document.getElementById('panelToggle').checked = false;">&times;</button>
+                <nav>
+                    <a href="/listaDeseos">Lista de deseos</a>
+                    <a href="/chat">Chat</a>
+                </nav>
+            </div>
+            {% endif %}
+
+            {% if perfil_usuario.tipo_usuario == 'anfitrion' %}
+            <!-- Panel lateral para el tipo de usuario anfitrión -->
+            <div class="side-panel">
+                <!-- Botón de cerrar (X) en la parte superior derecha -->
+                <button class="close-panel"
+                    onclick="document.getElementById('panelToggle').checked = false;">&times;</button>
+                <nav>
+                    <a href="/historialReserva">Historial de reservas</a>
+                    <a href="/chat">Chat</a>
+                    <a href="/gestionPropiedad">Gestión de propiedades</a>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <h1>Escapadas a tu medida</h1>
+        <form action="{% url 'buscar' %}" method="get" class="search-form">
+            <input type="text" name="query" placeholder="Buscar alojamientos..." required class="search-input">
+            <button type="submit" class="search-button">Buscar</button>
+
+
+        </form>
+        <div class="filter-dropdown">
+            <button type="button" class="search-button" onclick="toggleFilter()">Filtrar</button>
+
+            <!-- Formulario de filtros -->
+            <form method="GET" action="{% url 'buscar_alojamientos' %}" class="filter-form" id="filterForm">
+                <label for="ubicacion">Ubicación:</label>
+                <input type="text" id="ubicacion" name="ubicacion">
+
+                <label for="precio_min">Precio mínimo:</label>
+                <input type="number" id="precio_min" name="precio_min" step="0.01" min="0">
+
+                <label for="precio_max">Precio máximo:</label>
+                <input type="number" id="precio_max" name="precio_max" step="0.01" min="0">
+
+                <label for="disponible">Disponibilidad:</label>
+                <select id="disponible" name="disponible">
+                    <option value="">Cualquiera</option>
+                    <option value="true">Disponible</option>
+                    <option value="false">No disponible</option>
+                </select>
+
+                <!-- Botón "Aplicar Filtros" para enviar el formulario -->
+                <button type="submit">Aplicar Filtros</button>
+            </form>
+        </div>
+        <script>
+            // Función para mostrar/ocultar el formulario de filtros
+            function toggleFilter() {
+                var filterForm = document.getElementById("filterForm");
+                if (filterForm.style.display === "none" || filterForm.style.display === "") {
+                    filterForm.style.display = "block";
+                } else {
+                    filterForm.style.display = "none";
+                }
+            }
+
+            // Cierra el formulario de filtros si se hace clic fuera de él
+            window.onclick = function (event) {
+                var filterForm = document.getElementById("filterForm");
+                if (!event.target.closest('.filter-dropdown') && filterForm.style.display === "block") {
+                    filterForm.style.display = "none";
+                }
+            }
+        </script>
+        <nav>
+            {% if user.is_authenticated %}
+            <a href="/perfil/">{{ user.username }}</a>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="search-button">Cerrar sesión</button>
+            </form>
+            {% else %}
+            <a href="/login/">Login</a>
+            <a href="/registro/">Registro</a>
+            {% endif %}
+        </nav>
+    </div>
+</body>
+
+<body>
+
+    <div class="container my-4">
+        <h1 class="text-decoration">Resultados de búsqueda</h1>
+
+        <div class="result-list mt-4">
+            {% if resultados %}
+            <ul class="list-group">
+                {% for propiedad in resultados %}
+                <li class="list-group-item">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ propiedad.titulo }}</h5>
+                            <p class="card-text">{{ propiedad.descripcion }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-danger">No se encontraron resultados.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- JavaScript de Bootstrap (opcional, solo si necesitas funcionalidad de Bootstrap) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
