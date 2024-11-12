@@ -28,3 +28,17 @@ class FormularioRegistroUsuario(forms.ModelForm):
 class FormularioInicioSesion(AuthenticationForm):
     username = forms.CharField(label="Usuario", max_length=255)
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
+
+
+class FormularioEdicionPerfil(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email']  # Solo estos campos serán editables
+        labels = {
+            'username': 'Nombre de usuario',
+            'email': 'Correo',
+        }
+        help_texts = {
+            'username': None,  # Quita el texto de ayuda del campo username
+        }
+
