@@ -137,14 +137,21 @@
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
+            <p>
+                Nota: si deseas cambiar tanto tu correo como tu contraseña,
+                primero debes actualizar tu correo electrónico y guardar los cambios.
+                Luego, vuelve a esta página para cambiar tu contraseña.
+            </p>
             <button type="submit">Guardar Cambios</button>
         </form>
 
-        <!-- <p>
+        
+
+        <p>
             ¿Quieres cambiar tu contraseña?
             <a href="{{ cambio_contrasena_url }}">Haz clic aquí</a> para recibir un correo electrónico con las
             instrucciones.
-        </p> -->
+        </p>
 
         <!-- Mostrar mensajes de éxito o error -->
         {% if messages %}

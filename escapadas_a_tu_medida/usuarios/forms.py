@@ -34,6 +34,9 @@ class FormularioEdicionPerfil(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email']  # Solo estos campos serán editables
+        widgets = {
+            'email': forms.EmailInput(attrs={'id': 'id_email'}),
+        }
         labels = {
             'username': 'Nombre de usuario',
             'email': 'Correo',

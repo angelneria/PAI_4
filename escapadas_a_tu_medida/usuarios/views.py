@@ -7,6 +7,8 @@ from .forms import FormularioEdicionPerfil, FormularioRegistroUsuario, Formulari
 from .models import PerfilUsuario
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
 
 def registro(request):
     if request.method == "POST":
@@ -67,7 +69,7 @@ def editar_perfil(request):
         form = FormularioEdicionPerfil(instance=user)
 
     # Generamos la URL para el restablecimiento de contraseña
-    cambio_contrasena_url = reverse('password_reset')  # Nombre de la vista para cambiar contraseña
+    cambio_contrasena_url = reverse('password_reset') + f"?email={user.email}"  # Nombre de la vista para cambiar contraseña
 
     return render(request, "usuarios/perfil.html", {
         "form": form,
