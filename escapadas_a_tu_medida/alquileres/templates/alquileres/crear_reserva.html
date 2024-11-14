@@ -1,0 +1,26 @@
+<body>
+    <div >
+        <h2>Crear Nueva Reserva</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Formulario de la Propiedad -->
+            <div>
+                <h3>Detalles de la Propiedad</h3>
+                {{ reserva_form.as_p }}  <!-- Campo del formulario de Propiedad -->
+            </div>
+            
+            
+            <button type="submit">Crear Reserva</button>
+        </form>
+
+        <!-- Mostrar mensajes de éxito o error -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</body>
