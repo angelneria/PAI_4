@@ -3,9 +3,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .forms import FormularioRegistroUsuario, FormularioInicioSesion
+from .forms import FormularioEdicionPerfil, FormularioRegistroUsuario, FormularioInicioSesion
 from .models import PerfilUsuario
-from django.contrib.auth.models import User
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
 
 def registro(request):
     if request.method == "POST":
@@ -50,6 +53,28 @@ def iniciar_sesion(request):
     else:
         form = FormularioInicioSesion()
     return render(request, "usuarios/iniciar_sesion.html", {"form": form})
+
+@login_required
+def editar_perfil(request):
+    user = request.user  # Usuario actual
+    if request.method == "POST":
+        form = FormularioEdicionPerfil(request.POST, instance=user)
+        if form.is_valid():
+            form.save()  # Guardamos solo username y email
+            messages.success(request, "Perfil actualizado exitosamente.")
+            return redirect('/')  # Cambia al nombre de la vista a la que quieras redirigir
+        else:
+            messages.error(request, "Hubo un error al actualizar el perfil.")
+    else:
+        form = FormularioEdicionPerfil(instance=user)
+
+    # Generamos la URL para el restablecimiento de contraseña
+    cambio_contrasena_url = reverse('password_reset') + f"?email={user.email}"  # Nombre de la vista para cambiar contraseña
+
+    return render(request, "usuarios/perfil.html", {
+        "form": form,
+        "cambio_contrasena_url": cambio_contrasena_url,
+    })
 
 
 def logout_view(request):
