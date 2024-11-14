@@ -22,3 +22,9 @@ class PropiedadForm(forms.ModelForm):
         model = Propiedad
         fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'disponible']
 
+class FiltroAlojamientosForm(forms.Form):
+    ubicacion = forms.CharField(max_length=255, required=False, label="Ubicación")
+    precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
+    precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
+    disponible = forms.ChoiceField(choices=[('', 'Cualquiera'), ('true', 'Disponible'), ('false', 'No disponible')], required=False, label="Disponibilidad")
+

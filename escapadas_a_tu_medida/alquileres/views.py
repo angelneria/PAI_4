@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Propiedad, Imagen  
 from django.core.exceptions import PermissionDenied
-from .forms import PropiedadForm, ImagenFormSet
+from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm
 from django.forms import modelformset_factory
 
 
@@ -33,23 +33,58 @@ def reservar_propiedad(request, propiedad_id):
         pass
     return redirect('listar_propiedades')
 
+def buscar_alojamientos(request):
+    form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
+    propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
+    print("Datos recibidos:", request.GET)
+    # Aplicar filtros del formulario si es válido
+    if not form.is_valid():
+        print("Errores en el formulario:", form.errors)
+    if form.is_valid():
+        ubicacion = form.cleaned_data.get('ubicacion')
+        precio_min = form.cleaned_data.get('precio_min')
+        precio_max = form.cleaned_data.get('precio_max')
+        disponible = form.cleaned_data.get('disponible')
+
+        print("Ubicación:", ubicacion)
+        print("Precio mínimo:", precio_min)
+        print("Precio máximo:", precio_max)
+        print("Disponible:", disponible)
+
+        if ubicacion:
+            propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
+        if precio_min is not None:
+            propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
+        if precio_max is not None:
+            propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
+        if disponible is not None:
+            if disponible == 'true':
+                propiedades = propiedades.filter(disponible=True)
+            elif disponible == 'false':
+                propiedades = propiedades.filter(disponible=False)
 
 
+    # Renderizamos la plantilla con el formulario y los resultados
+    return render(request, 'buscar.html', {
+        'form': form,
+        'resultados': propiedades,
+    })
 
-def buscar_alojamiento(request):
-    query = request.GET.get('query', '')  # Obtener el término de búsqueda desde la URL
-    
+def buscar(request):
+    query = request.GET.get('query', '')
+
     if query:
-        # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
-        resultados = Propiedad.objects.filter(
-            Q(titulo__icontains=query) |
-            Q(descripcion__icontains=query) |
-            Q(ubicacion__icontains=query)
-        )
+            # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
+            propiedades = Propiedad.objects.filter(
+                Q(titulo__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(ubicacion__icontains=query)
+            )
     else:
-        resultados = Propiedad.objects.none()
+        propiedades = Propiedad.objects.none()
 
-    return render(request, 'buscar.html', {'resultados': resultados, 'query': query})
+    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query})
+
 
 
 
