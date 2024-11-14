@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Propiedad, Imagen  
 from django.core.exceptions import PermissionDenied
-from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm
+from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm
 from django.forms import modelformset_factory
 
 
@@ -26,12 +26,26 @@ def listar_propiedades(request):
     return render(request, 'alquileres/listar_propiedades.html', {'propiedades': propiedades})
 
 @login_required
-def reservar_propiedad(request, propiedad_id):
-    propiedad = Propiedad.objects.get(id=propiedad_id)
-    if request.user.perfilusuario.es_inquilino():
-        # lógica para reservar la propiedad
-        pass
-    return redirect('listar_propiedades')
+def crear_reserva(request, propiedad_id):
+    propiedad = Propiedad.objects.get(pk=propiedad_id)
+    
+    if request.method == 'POST':
+        reserva_form = ReservaForm(request.POST)
+        
+        if reserva_form.is_valid():
+            reserva = reserva_form.save(commit=False)
+            reserva.inquilino = request.user.perfilusuario  # Asocia la reserva al usuario actual
+            reserva.propiedad = propiedad  # Asocia la propiedad seleccionada
+            reserva.save()  # Guarda la reserva en la base de datos
+
+            return redirect('/')  # Redirige al detalle de la reserva creada
+    else:
+        reserva_form = ReservaForm()
+
+    return render(request, 'alquileres/crear_reserva.html', {
+        'reserva_form': reserva_form,
+        'propiedad': propiedad,
+    })
 
 def buscar_alojamientos(request):
     form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
@@ -103,7 +117,7 @@ def crear_propiedad(request):
             imagen_formset.instance = propiedad
             imagen_formset.save()
 
-            return redirect('/', pk=propiedad.pk)  # Redirige al detalle de la propiedad creada
+            return redirect('/')  # Redirige al detalle de la propiedad creada
     else:
         propiedad_form = PropiedadForm()
         imagen_formset = ImagenFormSet()
