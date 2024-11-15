@@ -43,32 +43,6 @@
     <p class="text-danger">No se encontraron resultados.</p>
     {% endif %}
 
-    <h1>Escapadas a tu medida</h1>
-    <form action="{% url 'buscar_alojamientos' %}" method="get" class="search-form">
-        <!-- Barra de búsqueda -->
-        <input type="text" name="query" placeholder="Buscar alojamientos..." value="{{ query }}" class="search-input">
-
-        <!-- Filtros -->
-        <div class="filter-fields">
-            <label for="ubicacion">Ubicación:</label>
-            <input type="text" id="ubicacion" name="ubicacion" value="{{ form.ubicacion.value }}">
-
-            <label for="precio_min">Precio mínimo:</label>
-            <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
-                value="{{ form.precio_min.value }}">
-
-            <label for="precio_max">Precio máximo:</label>
-            <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
-                value="{{ form.precio_max.value }}">
-
-
-        </div>
-
-        <!-- Botones -->
-        <button type="submit" class="search-button">Buscar</button>
-    </form>
-
-    
     <div class="dropdown filter-dropdown">
         <!-- Botón para abrir el menú de filtros -->
         <button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" id="filterDropdown"
@@ -89,11 +63,22 @@
                 <input type="number" id="precio_max" name="precio_max" step="0.01" min="0" class="form-control">
             </div>
 
+            <input type="hidden" name="query" value="{{ query }}">
+
+
             <!-- Botón "Aplicar Filtros" para enviar el formulario -->
             <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
         </form>
     </div>
+    <div class="mt-4">
+        <a href="{% url 'buscar_alojamientos' %}?query={{ query }}" class="btn btn-outline-secondary w-100">
+            Quitar Filtros
+        </a>
+    </div>
 </div>
+
+
+
 
 
 {% endblock %}

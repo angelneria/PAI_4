@@ -45,13 +45,18 @@ def crear_reserva(request, propiedad_id):
     })
 
 
+
+
+
 def buscar_alojamientos(request):
     form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
     query = request.GET.get('query', '')  # Obtener el término de búsqueda desde la barra de búsqueda
-    
-    # Realizar la búsqueda inicial con el query si está presente
-    propiedades = Propiedad.objects.all()
-    
+    propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
+
+
+
+
+    # Realizar la búsqueda inicial con el query si está presente    
     if query:
         propiedades = propiedades.filter(
             Q(titulo__icontains=query) |
@@ -86,38 +91,27 @@ def buscar_alojamientos(request):
     })
 
 
-
 def buscar(request):
     query = request.GET.get('query', '')
-    propiedades = Propiedad.objects.none()  # Inicializar siempre
-
 
     if query:
-        # Buscar propiedades
-        propiedades = Propiedad.objects.filter(
-            Q(titulo__icontains=query) |
-            Q(descripcion__icontains=query) |
-            Q(ubicacion__icontains=query)
-        )
+            # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
+            propiedades = Propiedad.objects.filter(
+                Q(titulo__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(ubicacion__icontains=query)
+            )
+            
 
-        # Serializar resultados
-        resultados = []
-        for propiedad in propiedades:
-            resultados.append({
-                'id': propiedad.id,
-                'titulo': propiedad.titulo,
-                'ubicacion': propiedad.ubicacion,
-                'precio_por_noche': float(propiedad.precio_por_noche),  # Decimal a float
-            })
-
-        # Guardar en la sesión
-        request.session['resultados'] = resultados
     else:
-        request.session['resultados'] = []
+        propiedades = Propiedad.objects.none()
 
-    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query})
+    
+
+    
 
 
+    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query, })
 
 
 
