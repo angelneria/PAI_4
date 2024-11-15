@@ -8,6 +8,7 @@ class ImagenForm(forms.ModelForm):
         model = Imagen
         fields = ['imagen', 'descripcion']
 
+
 # Crear un formset para las imágenes asociadas a una propiedad
 ImagenFormSet = inlineformset_factory(
     Propiedad, Imagen,  # Relación entre propiedad e imagen
@@ -20,7 +21,7 @@ ImagenFormSet = inlineformset_factory(
 class PropiedadForm(forms.ModelForm):
     class Meta:
         model = Propiedad
-        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'disponible_fecha_inicio', 'disponible_fecha_final']
+        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche']
 
 class FiltroAlojamientosForm(forms.Form):
     ubicacion = forms.CharField(max_length=255, required=False, label="Ubicación")

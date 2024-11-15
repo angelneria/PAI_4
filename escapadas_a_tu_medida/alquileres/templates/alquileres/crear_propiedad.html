@@ -112,6 +112,12 @@
         }
 
     </style>
+    <!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 </head>
 <body>
     <div class="crear-propiedad-container">
@@ -127,6 +133,11 @@
             
             <!-- Formulario para las Imágenes -->
             <div>
+                <h3>Seleccionar Fechas Disponibles</h3>
+                <input type="text" id="fechas_disponibles" name="fechas_disponibles" placeholder="Selecciona las fechas" />
+            </div>
+
+            <div>
                 <h3>Imágenes de la Propiedad (máximo 10)</h3>
                 
                 <!-- Formset de imágenes -->
@@ -139,8 +150,19 @@
                 {% endfor %}
             </div>
             
+            
             <button type="submit">Crear Propiedad</button>
         </form>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                flatpickr("#fechas_disponibles", {
+                    mode: "multiple", // Permitir seleccionar varias fechas
+                    dateFormat: "Y-m-d", // Formato de fecha (año-mes-día)
+                });
+            });
+        </script>
+        
 
         <!-- Mostrar mensajes de éxito o error -->
         {% if messages %}
