@@ -1,35 +1,30 @@
-<!-- usuarios/templates/usuarios/registro.html -->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Usuario</title>
-    <!-- Estilos en línea para personalizar la página -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Vinculación de Bootstrap desde CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos adicionales -->
     <style>
         /* Estilo general */
         body {
+            background-color: #f3f4f8;
             font-family: 'Poppins', sans-serif;
-            background-color: #dfece0; /* Fondo */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
 
         /* Contenedor del formulario */
         .registro-container {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 500px; /* Aumento del ancho del formulario */
+            margin-top: 20px; /* Ajuste de margen superior */
+            padding: 50px; /* Mayor padding para más espacio interno */
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave para transform y box-shadow */
+
         }
 
         /* Efecto de profundidad al pasar el ratón */
@@ -40,8 +35,12 @@
 
         /* Estilo de los encabezados */
         h2 {
+            font-size: 30px; /* Título más grande */
+            font-weight: 700; /* Más negrita */
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+            text-transform: uppercase;
         }
 
         /* Estilo del formulario */
@@ -85,20 +84,18 @@
 
         /* Botón de registro */
         button[type="submit"] {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 8px;
+            padding: 16px; /* Aumento de padding en el botón */
+            font-size: 18px; /* Botón más grande */
+            font-weight: 700;
+            width: 100%;
             transition: background-color 0.3s ease;
-            width: 100%; /* Hace que el botón ocupe el 100% del ancho */
         }
 
         button[type="submit"]:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
         .helptext {
             display: none;
@@ -111,26 +108,48 @@
             font-size: 14px;
         }
 
+        /* Botón de "X" fuera del contenedor */
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: transparent;
+            color: black;
+            padding: 10px 15px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
     </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
 </head>
 <body>
-    <div class="registro-container">
-        <h2>Crear una Cuenta</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }} <!-- Esto ya incluye todos los campos, incluidos los campos de texto, correo y tipo_usuario -->
+    <button class="close-btn" onclick="window.location.href='/'">
+        <i class="fas fa-home"></i>
+    </button>
 
-            <button type="submit">Registrarse</button>
-        </form>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="registro-container">
+            <h2>Crear una Cuenta</h2>
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Renderizar el formulario con <p> para mantener el formato original -->
+                {{ form.as_p }}
 
-        <!-- Mostrar mensajes de éxito o error -->
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
+                <button type="submit" class="btn btn-custom">Registrarse</button>
+            </form>
+
+            <div class="text-muted mt-4">
+                <p>¿Ya tienes una cuenta? <a href="/login">Inicia sesión aquí</a></p>
             </div>
-        {% endif %}
+        </div>
     </div>
+
+    <!-- Scripts de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

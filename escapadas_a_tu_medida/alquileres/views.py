@@ -7,23 +7,20 @@ from .models import Propiedad, Imagen
 from django.core.exceptions import PermissionDenied
 from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm
 from django.forms import modelformset_factory
-
+from decimal import Decimal
+from datetime import date
 
 def home(request):
+    propiedades = Propiedad.objects.all()
     if request.user.is_authenticated:
         perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
+
     else:
         perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
     
-    return render(request, 'home.html', {'perfil_usuario': perfil_usuario})
+    return render(request, 'home.html', {'perfil_usuario': perfil_usuario, 'resultados':propiedades})
 
-@login_required
-def listar_propiedades(request):
-    if request.user.perfilusuario.es_anfitrion():
-        propiedades = Propiedad.objects.filter(propietario=request.user.perfilusuario)
-    else:
-        propiedades = Propiedad.objects.filter(disponible=True)
-    return render(request, 'alquileres/listar_propiedades.html', {'propiedades': propiedades})
+
 
 @login_required
 def crear_reserva(request, propiedad_id):
@@ -48,56 +45,57 @@ def crear_reserva(request, propiedad_id):
     })
 
 def buscar_alojamientos(request):
-    form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
-    propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
-    print("Datos recibidos:", request.GET)
-    # Aplicar filtros del formulario si es válido
-    if not form.is_valid():
-        print("Errores en el formulario:", form.errors)
-    if form.is_valid():
-        ubicacion = form.cleaned_data.get('ubicacion')
-        precio_min = form.cleaned_data.get('precio_min')
-        precio_max = form.cleaned_data.get('precio_max')
-        disponible = form.cleaned_data.get('disponible')
+    form = FiltroAlojamientosForm(request.GET or None)
 
-        print("Ubicación:", ubicacion)
-        print("Precio mínimo:", precio_min)
-        print("Precio máximo:", precio_max)
-        print("Disponible:", disponible)
+    # Recuperar resultados de la sesión
+    resultados = request.session.get('resultados', [])
 
-        if ubicacion:
-            propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
-        if precio_min is not None:
-            propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
-        if precio_max is not None:
-            propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
-        if disponible is not None:
-            if disponible == 'true':
-                propiedades = propiedades.filter(disponible=True)
-            elif disponible == 'false':
-                propiedades = propiedades.filter(disponible=False)
+    # Filtros
+    precio_min = request.GET.get('precio_min')
+    precio_max = request.GET.get('precio_max')
 
+    # Aplicar filtros sobre los diccionarios
+    if precio_min:
+        resultados = [r for r in resultados if r['precio_por_noche'] >= float(precio_min)]
+    if precio_max:
+        resultados = [r for r in resultados if r['precio_por_noche'] <= float(precio_max)]
 
-    # Renderizamos la plantilla con el formulario y los resultados
     return render(request, 'buscar.html', {
         'form': form,
-        'resultados': propiedades,
+        'resultados': resultados,
     })
+
 
 def buscar(request):
     query = request.GET.get('query', '')
+    propiedades = Propiedad.objects.none()  # Inicializar siempre
+
 
     if query:
-            # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
-            propiedades = Propiedad.objects.filter(
-                Q(titulo__icontains=query) |
-                Q(descripcion__icontains=query) |
-                Q(ubicacion__icontains=query)
-            )
+        # Buscar propiedades
+        propiedades = Propiedad.objects.filter(
+            Q(titulo__icontains=query) |
+            Q(descripcion__icontains=query) |
+            Q(ubicacion__icontains=query)
+        )
+
+        # Serializar resultados
+        resultados = []
+        for propiedad in propiedades:
+            resultados.append({
+                'id': propiedad.id,
+                'titulo': propiedad.titulo,
+                'ubicacion': propiedad.ubicacion,
+                'precio_por_noche': float(propiedad.precio_por_noche),  # Decimal a float
+            })
+
+        # Guardar en la sesión
+        request.session['resultados'] = resultados
     else:
-        propiedades = Propiedad.objects.none()
+        request.session['resultados'] = []
 
     return render(request, 'buscar.html', {'resultados': propiedades, 'query': query})
+
 
 
 

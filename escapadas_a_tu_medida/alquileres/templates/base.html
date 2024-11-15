@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Sitio de Reservas{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    {% load static %}
+
+    <style>
+        /* Estilos personalizados para el navbar */
+        .navbar {
+            background-image: url('/media/navbar.jpg'); /* Usa la ruta de MEDIA_URL */
+            background-size: cover; /* Ajusta la imagen para que cubra el espacio */
+            background-position: center; /* Centra la imagen en el navbar */
+            height: 500px;
+        }
+
+        .navbar-toggler {
+            background-color: transparent !important; /* Hace el botón completamente transparente */
+            border: none !important; /* Elimina cualquier borde del botón */
+            padding: 0.5rem; /* Opcional: Ajusta el área de clic */
+        }
+
+        .navbar-toggler-icon {
+            background-color: transparent; /* Asegura que no haya fondo en el ícono */
+            background-image: none; /* Elimina el ícono predeterminado */
+            border: 2px solid rgba(255, 255, 255, 0.7); /* Opcional: Bordes del ícono estilo hamburguesa */
+            border-radius: 2px; /* Opcional: Suaviza los bordes */
+            width: 30px; /* Tamaño personalizado del ícono */
+            height: 2px;
+            position: relative;
+        }
+
+        .navbar-toggler-icon::before,
+        .navbar-toggler-icon::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px; /* Altura de las barras */
+            background-color: rgba(255, 255, 255, 0.7); /* Color blanco semitransparente */
+        }
+
+        .navbar-toggler-icon::before {
+            top: -6px; /* Espaciado para la barra superior */
+        }
+
+        .navbar-toggler-icon::after {
+            top: 6px; /* Espaciado para la barra inferior */
+        }
+
+
+    </style>
+        {% block navbar_custom_styles %}{% endblock %}
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body>
+    <!-- Navbar con Bootstrap -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="top-0 start-0 d-flex p-3" style="position: absolute; top: 0; left: 0;">
+
+        {% if user.is_authenticated %}
+    <!-- Botón para abrir el panel lateral -->
+
+            <button class="btn bg-transparent border-0 text-white fs-1 me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasPanel" aria-controls="offcanvasPanel">
+                ≡
+            </button>
+    
+    
+        {% endif %}
+            <!-- Logo o nombre de la página -->
+            <a class="navbar-brand text-white fs-1" href="/">Escapadas a tu medida</a>
+
+            <!-- Botón para mostrar/ocultar el menú en pantallas pequeñas -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>        
+        </div>
+        <!-- Enlaces y formulario dentro del navbar -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav d-flex align-items-center"> <!-- Mantén la alineación -->
+                {% if user.is_authenticated %}
+                    <!-- Enlace al perfil del usuario -->
+                    <!-- Contenedor de los dos elementos en la esquina superior derecha -->
+                    <div class="top-0 end-0 d-flex p-3" style="position: absolute; top: 0; right: 0;">
+                        <!-- Nombre de usuario -->
+                        <li class="nav-item me-3">
+                            <a class="nav-link text-white fs-4" href="/perfil/">{{ user.username }}</a>
+                        </li>
+
+                        <!-- Botón de cerrar sesión -->
+                        <li class="nav-item">
+                            <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link text-white fs-4">Cerrar sesión</button>
+                            </form>
+                        </li>
+                    </div>
+
+
+                {% else %}
+                    <!-- Enlaces para login y registro si el usuario no está autenticado -->
+                    <div class="top-0 end-0 d-flex p-3" style="position: absolute; top: 0; right: 0;">
+                        <li class="nav-item me-3"> <!-- Agrega un poco de espacio -->
+                        <a class="nav-link text-white fs-4" href="/login/">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-link nav-link text-white fs-4" href="/registro/">Registro</a>
+                    </li>
+                </div>
+
+                {% endif %}
+            </ul>
+        </div>
+        <div class="container-fluid">
+            <!-- Barra de búsqueda centrada en el navbar -->
+            <div class="d-flex justify-content-center w-100">
+                <form action="{% url 'buscar' %}" method="get" class="input-group mb-3" style="max-width: 900px; width: 100%;">
+                    <input type="text" name="query" class="form-control rounded-start-pill" placeholder="Buscar alojamientos..." required>
+                    <button type="submit" class="btn btn-primary rounded-end-pill border-0">Buscar</button>
+                </form>
+                
+            </div>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+</nav>
+       <!-- Offcanvas para Inquilino -->
+       {% if perfil_usuario.tipo_usuario == 'inquilino' %}
+       <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasPanel" aria-labelledby="offcanvasPanelLabel" style="background-color: white; color: #304a6e;">
+           <div class="offcanvas-header">
+               <h2 class="offcanvas-title" id="offcanvasInquilinoLabel">Panel Inquilino</h2>
+               <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+           </div>
+           <hr class="my-2" style="border-top: 2px solid #304a6e; margin-top: 0; margin-bottom: 10px;"> <!-- Separador -->
+
+           <div class="offcanvas-body">
+               <nav>
+                   <a href="/listaDeseos" class="nav-link  fs-5 mb-3">Lista de deseos</a>
+                   <a href="/chat" class="nav-link fs-5 mb-3">Chat</a>
+               </nav>
+           </div>
+       </div>
+       {% endif %}
+   
+       <!-- Offcanvas para Anfitrión -->
+       {% if perfil_usuario.tipo_usuario == 'anfitrion' %}
+       <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasPanel" aria-labelledby="offcanvasPanelLabel" style="background-color: white; color: #304a6e;">
+           <div class="offcanvas-header">
+               <h2 class="offcanvas-title" id="offcanvasAnfitrionLabel">Panel Anfitrión</h2>
+               <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+           </div>
+           <hr class="my-2" style="border-top: 2px solid #304a6e; margin-top: 0; margin-bottom: 10px;"> <!-- Separador -->
+
+           <div class="offcanvas-body">
+               <nav>
+                   <a href="/historialReserva" class="nav-link  fs-5 mb-3">Historial de reservas</a>
+                   <a href="/chat" class="nav-link  fs-5 mb-3">Chat</a>
+                   <a href="/gestionPropiedad" class="nav-link  fs-5 mb-3">Gestión de propiedades</a>
+               </nav>
+           </div>
+       </div>
+       {% endif %}
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
