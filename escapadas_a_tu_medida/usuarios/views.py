@@ -25,7 +25,6 @@ def registro(request):
             
             # Iniciar sesión automáticamente después de registrarse
             login(request, usuario)
-            messages.success(request, "Registro exitoso. ¡Bienvenido!")
             # Redirige a la página inicial según el tipo de usuario
             return redirect("/")
     else:
