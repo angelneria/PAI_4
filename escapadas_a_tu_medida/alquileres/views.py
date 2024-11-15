@@ -33,57 +33,46 @@ def reservar_propiedad(request, propiedad_id):
         pass
     return redirect('listar_propiedades')
 
+
 def buscar_alojamientos(request):
     form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
-    propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
-    print("Datos recibidos:", request.GET)
+    query = request.GET.get('query', '')  # Obtener el término de búsqueda desde la barra de búsqueda
+    
+    # Realizar la búsqueda inicial con el query si está presente
+    propiedades = Propiedad.objects.all()
+    
+    if query:
+        propiedades = propiedades.filter(
+            Q(titulo__icontains=query) |
+            Q(descripcion__icontains=query) |
+            Q(ubicacion__icontains=query)
+        )
+
     # Aplicar filtros del formulario si es válido
-    if not form.is_valid():
-        print("Errores en el formulario:", form.errors)
     if form.is_valid():
         ubicacion = form.cleaned_data.get('ubicacion')
         precio_min = form.cleaned_data.get('precio_min')
         precio_max = form.cleaned_data.get('precio_max')
-        disponible = form.cleaned_data.get('disponible')
 
-        print("Ubicación:", ubicacion)
-        print("Precio mínimo:", precio_min)
-        print("Precio máximo:", precio_max)
-        print("Disponible:", disponible)
-
+        # Filtro por ubicación
         if ubicacion:
             propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
+        
+        # Filtro por precio mínimo
         if precio_min is not None:
             propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
+        
+        # Filtro por precio máximo
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
-        if disponible is not None:
-            if disponible == 'true':
-                propiedades = propiedades.filter(disponible=True)
-            elif disponible == 'false':
-                propiedades = propiedades.filter(disponible=False)
+        
 
-
-    # Renderizamos la plantilla con el formulario y los resultados
+    # Renderizar la plantilla con los resultados de la búsqueda y el formulario de filtros
     return render(request, 'buscar.html', {
         'form': form,
         'resultados': propiedades,
+        'query': query,
     })
-
-def buscar(request):
-    query = request.GET.get('query', '')
-
-    if query:
-            # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
-            propiedades = Propiedad.objects.filter(
-                Q(titulo__icontains=query) |
-                Q(descripcion__icontains=query) |
-                Q(ubicacion__icontains=query)
-            )
-    else:
-        propiedades = Propiedad.objects.none()
-
-    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query})
 
 
 

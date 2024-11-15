@@ -51,39 +51,6 @@
             margin: 0;
         }
 
-        /* Barra de búsqueda */
-        .search-form {
-            display: flex;
-            align-items: center;
-            margin-right: auto;
-        }
-
-        .search-input {
-            width: 800px;
-            height: 15px;
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 15px;
-            font-size: 16px;
-        }
-
-        .search-button {
-            background-color: #6fbf73;
-            color: white;
-            border: none;
-            border-radius: 15px;
-            height: 30px;
-            padding: 0 20px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .search-button:hover {
-            background-color: #4a9c5d;
-            /* Verde más oscuro al pasar el ratón */
-            transform: scale(1.05);
-            /* Ligeramente agrandar el botón para el efecto de interacción */
-        }
 
         /* Estilo del panel lateral */
         .side-panel {
@@ -241,62 +208,6 @@
             /* Esconde el checkbox */
         }
 
-        /* Contenedor del menú de filtros (oculto por defecto) */
-        .filter-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            /* Coloca el menú justo debajo del botón de filtro */
-            right: 0;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 250px;
-        }
-
-        /* Estilo del formulario oculto */
-        .filter-form {
-            display: none;
-            position: absolute;
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-            min-width: 250px;
-            top: 40px;
-            right: 0;
-        }
-
-        .filter-form label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .filter-form input,
-        .filter-form select {
-            width: 90%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .filter-form button {
-            margin-top: 10px;
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
 
         /* Estilos para la lista de propiedades */
         .result-list {
@@ -330,6 +241,36 @@
         .card-text {
             font-size: 1em;
             color: #333;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem;
+        }
+
+        .search-button {
+            padding: 0.5rem 1rem;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -372,56 +313,31 @@
         {% endif %}
 
         <h1>Escapadas a tu medida</h1>
-        <form action="{% url 'buscar' %}" method="get" class="search-form">
-            <input type="text" name="query" placeholder="Buscar alojamientos..." required class="search-input">
-            <button type="submit" class="search-button">Buscar</button>
+        <form action="{% url 'buscar_alojamientos' %}" method="get" class="search-form">
+            <!-- Barra de búsqueda -->
+            <input type="text" name="query" placeholder="Buscar alojamientos..." value="{{ query }}"
+                class="search-input">
 
-
-        </form>
-        <div class="filter-dropdown">
-            <button type="button" class="search-button" onclick="toggleFilter()">Filtrar</button>
-
-            <!-- Formulario de filtros -->
-            <form method="GET" action="{% url 'buscar_alojamientos' %}" class="filter-form" id="filterForm">
+            <!-- Filtros -->
+            <div class="filter-fields">
                 <label for="ubicacion">Ubicación:</label>
-                <input type="text" id="ubicacion" name="ubicacion">
+                <input type="text" id="ubicacion" name="ubicacion" value="{{ form.ubicacion.value }}">
 
                 <label for="precio_min">Precio mínimo:</label>
-                <input type="number" id="precio_min" name="precio_min" step="0.01" min="0">
+                <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
+                    value="{{ form.precio_min.value }}">
 
                 <label for="precio_max">Precio máximo:</label>
-                <input type="number" id="precio_max" name="precio_max" step="0.01" min="0">
+                <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
+                    value="{{ form.precio_max.value }}">
 
-                <label for="disponible">Disponibilidad:</label>
-                <select id="disponible" name="disponible">
-                    <option value="">Cualquiera</option>
-                    <option value="true">Disponible</option>
-                    <option value="false">No disponible</option>
-                </select>
+                
+            </div>
 
-                <!-- Botón "Aplicar Filtros" para enviar el formulario -->
-                <button type="submit">Aplicar Filtros</button>
-            </form>
-        </div>
-        <script>
-            // Función para mostrar/ocultar el formulario de filtros
-            function toggleFilter() {
-                var filterForm = document.getElementById("filterForm");
-                if (filterForm.style.display === "none" || filterForm.style.display === "") {
-                    filterForm.style.display = "block";
-                } else {
-                    filterForm.style.display = "none";
-                }
-            }
+            <!-- Botones -->
+            <button type="submit" class="search-button">Buscar</button>
+        </form>
 
-            // Cierra el formulario de filtros si se hace clic fuera de él
-            window.onclick = function (event) {
-                var filterForm = document.getElementById("filterForm");
-                if (!event.target.closest('.filter-dropdown') && filterForm.style.display === "block") {
-                    filterForm.style.display = "none";
-                }
-            }
-        </script>
         <nav>
             {% if user.is_authenticated %}
             <a href="/perfil/">{{ user.username }}</a>
