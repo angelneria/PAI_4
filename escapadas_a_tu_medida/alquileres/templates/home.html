@@ -32,7 +32,36 @@
             </div>
             {% endfor %}
         </div>
-
+        <div class="dropdown filter-dropdown">
+            <!-- Botón para abrir el menú de filtros -->
+            <button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" id="filterDropdown"
+                data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #304a6e; color: white;">
+                Filtrar
+            </button>
+            <!-- Formulario de filtros dentro del menú desplegable -->
+            <form method="GET" action="{% url 'home' %}" class="dropdown-menu p-4"
+                aria-labelledby="filterDropdown" style="width: 400px;">
+    
+                <div class="mb-3">
+                    <label for="precio_min" class="form-label">Precio mínimo:</label>
+                    <input type="number" id="precio_min" name="precio_min" step="0.01" min="0" class="form-control">
+                </div>
+    
+                <div class="mb-3">
+                    <label for="precio_max" class="form-label">Precio máximo:</label>
+                    <input type="number" id="precio_max" name="precio_max" step="0.01" min="0" class="form-control">
+                </div>
+        
+    
+                <!-- Botón "Aplicar Filtros" para enviar el formulario -->
+                <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+            </form>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100">
+                Quitar Filtros
+            </a>
+        </div>
         {% else %}
         <p class="text-danger">No se encontraron resultados.</p>
         {% endif %}

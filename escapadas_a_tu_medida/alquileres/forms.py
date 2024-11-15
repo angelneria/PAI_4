@@ -27,6 +27,10 @@ class FiltroAlojamientosForm(forms.Form):
     precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
 
+class FiltroAlojamientosHomeForm(forms.Form):
+    precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
+    precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
+
 
 class ReservaForm(forms.ModelForm):
     class Meta:
