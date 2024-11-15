@@ -13,12 +13,19 @@ class Propiedad(models.Model):
     descripcion = models.TextField()
     ubicacion = models.CharField(max_length=255)
     precio_por_noche = models.DecimalField(max_digits=10, decimal_places=2)
-    disponible_fecha_inicio= models.DateField(default=datetime.date(2024, 1, 1))
-    disponible_fecha_final = models.DateField(default=datetime.date(2024, 1, 1))
-    
 
     def __str__(self):
         return self.titulo
+    
+class Disponibilidad(models.Model):
+    propiedad = models.ForeignKey(Propiedad, on_delete=models.CASCADE, related_name='disponibilidades')
+    fecha = models.DateField()
+
+    class Meta:
+        unique_together = ('propiedad', 'fecha')  # Asegura que no haya duplicados
+
+    def __str__(self):
+        return f"{self.propiedad.titulo} - {self.fecha}"
     
 
 class Imagen(models.Model):
