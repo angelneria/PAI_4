@@ -1,128 +1,164 @@
-<!-- usuarios/templates/usuarios/iniciar_sesion.html -->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Estilos en línea para personalizar la página -->
+    <!-- Vinculación de Bootstrap desde CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos adicionales -->
     <style>
-        /* Estilo general */
         body {
+            background-color: #f3f4f8;
             font-family: 'Poppins', sans-serif;
-            background-color: #dfece0; /* Fondo */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
 
-        /* Contenedor del formulario */
         .login-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px; /* Ancho máximo para pantallas grandes */
-            width: 100%;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 500px; /* Aumento del ancho del formulario */
+            margin-top: 20px; /* Ajuste de margen superior */
+            padding: 50px; /* Mayor padding para más espacio interno */
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transición suave para transform y box-shadow */
         }
 
-        /* Efecto de profundidad al pasar el ratón */
+        .login-container h2 {
+            font-size: 30px; /* Título más grande */
+            font-weight: 700; /* Más negrita */
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
         .login-container:hover {
             transform: scale(1.05); /* Aumenta ligeramente el tamaño */
             box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2); /* Más sombra */
         }
 
-        /* Estilo de los encabezados */
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
+        .form-group label {
+            font-size: 18px; /* Etiquetas más grandes */
+            color: #444;
+            font-weight: 600;
         }
 
-        /* Estilo del formulario */
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch; /* Asegura que los elementos ocupen el 100% del ancho */
+        .form-control {
+            border-radius: 8px;
+            padding: 16px; /* Aumento de padding en los campos */
+            font-size: 18px; /* Aumento de tamaño de texto en los campos */
+            border: 1px solid #d1d1d1;
+            transition: border-color 0.3s ease;
         }
 
-        /* Estilo de las etiquetas */
-        label {
-            text-align: left;
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block; /* Asegura que la etiqueta se muestre como bloque */
-            font-size: 16px;
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
         }
 
-        /* Estilo de los campos del formulario */
-        input[type="text"], input[type="password"] {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            width: 100%; /* Hace que los campos ocupen el 100% del ancho */
-            box-sizing: border-box; /* Asegura que el padding no afecte al tamaño total */
-            text-align: left; /* Alinea el texto dentro de los campos a la izquierda */
-        }
-
-        /* Botón de login */
-        button[type="submit"] {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
+        .btn-custom {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 8px;
+            padding: 16px; /* Aumento de padding en el botón */
+            font-size: 18px; /* Botón más grande */
+            font-weight: 700;
+            width: 100%;
             transition: background-color 0.3s ease;
-            width: 100%; /* Hace que el botón ocupe el 100% del ancho */
+            outline: none;
+            border:none;
         }
 
-        button[type="submit"]:hover {
-            background-color: #45a049;
+        .btn-custom:hover {
+            background-color: #0056b3;
         }
 
-        /* Estilo para los mensajes */
         .messages {
-            color: #ff3333;
-            margin-top: 10px;
-            font-size: 14px;
+            color: #ff4d4d;
+            font-size: 16px; /* Aumento del tamaño de los mensajes */
+            margin-top: 20px;
+            text-align: center;
         }
 
-        /* Media query para pantallas pequeñas (móviles) */
-        @media (max-width: 600px) {
+        .text-muted {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 25px; /* Aumento de espacio entre campos */
+        }
+
+        @media (max-width: 576px) {
             .login-container {
-                max-width: 90%; /* Ajusta el tamaño del contenedor a un 90% del ancho de la pantalla */
-                padding: 20px; /* Reduce el espacio de relleno */
+                margin-top: 20px; /* Ajuste para dispositivos móviles */
+                padding: 30px;
             }
         }
+
+        /* Botón de "X" fuera del contenedor */
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: transparent;
+            color: black;
+            padding: 10px 15px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
     </style>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
 </head>
 <body>
-    <div class="login-container">
-        <h2>Iniciar Sesión</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }} <!-- Los campos de usuario y contraseña se generarán aquí automáticamente -->
-            <button type="submit">Iniciar Sesión</button>
-        </form>
 
-        <!-- Mostrar mensajes de éxito o error -->
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
+    <button class="close-btn" onclick="window.location.href='/'">
+        <i class="fas fa-home"></i>
+    </button>
+
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="login-container">
+            <h2>Iniciar Sesión</h2>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn-custom">Iniciar Sesión</button>
+            </form>
+
+            <!-- Mostrar mensajes de error -->
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="text-muted mt-4">
+                <p>No tienes cuenta? <a href="/registro/">Regístrate</a></p>
             </div>
-        {% endif %}
+        </div>
     </div>
+
+    <!-- Inclusión de los scripts de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
 </body>
 </html>

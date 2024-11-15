@@ -1,386 +1,99 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados de búsqueda</title>
-    <!-- Estilos de Bootstrap CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Estilos personalizados */
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}Inicio - Escapadas a tu medida{% endblock %}
+{% block navbar_custom_styles %}
+<style>
+    .navbar {
+        height: 250px;
+        /* Cambiar la altura solo en esta página */
+    }
+</style>
+{% endblock %}
 
-        a {
-            color: inherit;
-            /* Hereda el color de texto del contenedor */
-            text-decoration: none;
-            /* Elimina el subrayado */
-            display: inline-block;
-            /* Hace que el margen inferior funcione en enlaces */
-        }
+{% block content %}
 
+<div class="result-list mt-4">
+    {% if resultados %}
+    <div class="row row-cols-1 g-4"> <!-- Solo una tarjeta por fila -->
+        {% for propiedad in resultados %}
+        <div class="col mb-4"> <!-- La tarjeta ocupa toda la fila -->
+            <div class="card">
+                <!-- Imagen de la propiedad arriba -->
+                {% if propiedad.imagenes.first.imagen.url %}
+                <img src="{{ propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ propiedad.titulo }}"
+                    style="height: 300px; object-fit: cover;">
+                {% endif %}
 
-        /* Estilos básicos para un diseño simple */
-
-        /* Cabecera principal */
-        .header {
-            background: linear-gradient(to left, #dfece0, #bcd5b0);
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header h1 {
-            margin: 0;
-        }
-
-        /* Barra de navegación */
-        .header nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header form {
-            margin: 0;
-        }
-
-
-        /* Estilo del panel lateral */
-        .side-panel {
-            position: fixed;
-            /* Fijo en la pantalla */
-            top: 0;
-            /* Desde la parte superior */
-            left: -100%;
-            /* Empujado fuera de la pantalla al inicio */
-            width: 300px;
-            /* Ancho del panel */
-            height: 100%;
-            /* Altura completa de la pantalla */
-            background-color: #333;
-            /* Fondo oscuro para el panel */
-            color: white;
-            /* Texto blanco */
-            transition: left 0.3s ease;
-            /* Transición suave para el movimiento */
-            padding: 20px;
-            /* Espaciado interno */
-            z-index: 1000;
-            /* Asegurarse de que esté encima de otros elementos */
-            display: flex;
-            /* Usamos flexbox para controlar la disposición */
-            flex-direction: column;
-            /* Apilar los elementos en una columna */
-            justify-content: flex-start;
-            /* Asegurarse que los elementos empiecen desde arriba */
-            align-items: stretch;
-            /* Asegurar que los elementos estiren al 100% de ancho */
-            box-sizing: border-box;
-            /* Incluir el padding y los bordes en el cálculo de ancho */
-        }
-
-        /* Estilo del contenedor de navegación dentro del panel lateral */
-        .side-panel nav {
-            display: flex;
-            /* Flexbox para alinear los elementos */
-            flex-direction: column;
-            /* Los enlaces se apilan verticalmente */
-            width: 100%;
-            /* Asegurarse que el contenedor ocupe todo el ancho disponible */
-            align-items: stretch;
-            /* Los enlaces deben estirarse para ocupar todo el ancho */
-            margin-top: 50px;
-        }
-
-        /* Estilo para los enlaces dentro del panel lateral */
-        .side-panel nav a {
-            display: block;
-            /* Los enlaces son bloques, ocupando toda la línea */
-            width: 100%;
-            /* Los enlaces ocuparán todo el ancho disponible */
-            color: white;
-            margin: 5px 0;
-            /* Espaciado vertical entre los enlaces (reducción del margen) */
-            text-decoration: none;
-            /* Eliminar subrayado */
-            font-size: 18px;
-            padding: 15px;
-            /* Añadir relleno para hacer cada enlace más grande */
-            border-radius: 10px;
-            /* Bordes redondeados */
-            background-color: #333;
-            /* Fondo gris oscuro por defecto */
-            transition: background-color 0.3s ease;
-            /* Transición suave para el cambio de color */
-            box-sizing: border-box;
-            /* Incluir el padding y los bordes en el cálculo del ancho */
-
-        }
-
-        /* Efecto al pasar el ratón sobre los enlaces */
-        .side-panel nav a:hover {
-            background-color: #6fbf73;
-            /* Fondo verde claro cuando se pasa el ratón */
-        }
-
-
-        /* Estilo del botón de cerrar (X) */
-        .close-panel {
-            position: absolute;
-            top: 10px;
-            /* Arriba */
-            right: 10px;
-            /* A la derecha */
-            background: none;
-            /* Sin fondo */
-            border: none;
-            /* Sin borde */
-            color: white;
-            /* Texto blanco */
-            font-size: 30px;
-            /* Tamaño grande para la X */
-            border-radius: 10px;
-            /* Bordes redondeados */
-
-            cursor: pointer;
-            /* Cambiar a cursor pointer */
-            padding: 5px 10px;
-            /* Espaciado alrededor de la X */
-            transition: background-color 0.3s ease;
-            /* Transición para el cambio de color */
-        }
-
-        /* Efecto al pasar el ratón sobre el botón de cerrar */
-        .close-panel:hover {
-            background-color: #6fbf73;
-            /* Fondo semi-transparente al pasar el ratón */
-        }
-
-        /* Mostrar el panel lateral cuando el checkbox esté marcado */
-        .panel-toggle:checked+.dropdown-toggle+.side-panel {
-            left: 0;
-            /* Mover el panel hacia la izquierda */
-        }
-
-        .filter-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        /* Estilos para el ícono de apertura */
-        .dropdown-toggle {
-            background-color: #6fbf73;
-            /* Verde similar al botón de búsqueda */
-            color: white;
-            /* Texto blanco */
-            border: none;
-            /* Sin borde */
-            padding: 10px 20px;
-            /* Relleno interno (espaciado) */
-            font-size: 24px;
-            /* Tamaño grande para el ícono ≡ */
-            border-radius: 25px;
-            /* Bordes redondeados */
-            cursor: pointer;
-            /* Cursor en forma de puntero */
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            /* Transición suave */
-        }
-
-        /* Efecto al pasar el ratón sobre el botón */
-        .dropdown-toggle:hover {
-            background-color: #4a9c5d;
-            /* Verde más oscuro al pasar el ratón */
-            transform: scale(1.05);
-            /* Aumentar ligeramente el tamaño del botón */
-        }
-
-        /* Ocultar el checkbox visualmente pero mantener su funcionalidad */
-        .panel-toggle {
-            display: none;
-            /* Esconde el checkbox */
-        }
-
-
-        /* Estilos para la lista de propiedades */
-        .result-list {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
-        .list-group-item {
-            border: none;
-            padding: 0;
-        }
-
-        .card {
-            border-radius: 10px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-title {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: #4a9c5d;
-        }
-
-        .card-text {
-            font-size: 1em;
-            color: #333;
-        }
-
-        .search-form {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .filter-fields {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.5rem;
-        }
-
-        .search-button {
-            padding: 0.5rem 1rem;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .search-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="header">
-        {% if user.is_authenticated %}
-        <div class="dropdown">
-            <!-- Checkbox para abrir y cerrar el panel lateral -->
-            <input type="checkbox" id="panelToggle" class="panel-toggle">
-            <label for="panelToggle" class="dropdown-toggle">≡</label>
-
-            {% if perfil_usuario.tipo_usuario == 'inquilino' %}
-            <!-- Panel lateral para el tipo de usuario inquilino -->
-            <div class="side-panel">
-                <!-- Botón de cerrar (X) en la parte superior derecha -->
-                <button class="close-panel"
-                    onclick="document.getElementById('panelToggle').checked = false;">&times;</button>
-                <nav>
-                    <a href="/listaDeseos">Lista de deseos</a>
-                    <a href="/chat">Chat</a>
-                </nav>
+                <div class="card-body">
+                    <!-- Contenido de la tarjeta (título, descripción, etc.) -->
+                    <h4 class="card-title">{{ propiedad.titulo }}</h4>
+                    <p class="card-text text-muted" style="font-size: 1rem;">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ propiedad.ubicacion }}
+                    </p>
+                    <p class="card-text text-muted" style="font-size: 1rem;">
+                        <i class="fas fa-money-bill me-2"></i>{{ propiedad.precio_por_noche }} €/noche
+                    </p>
+                </div>
             </div>
-            {% endif %}
-
-            {% if perfil_usuario.tipo_usuario == 'anfitrion' %}
-            <!-- Panel lateral para el tipo de usuario anfitrión -->
-            <div class="side-panel">
-                <!-- Botón de cerrar (X) en la parte superior derecha -->
-                <button class="close-panel"
-                    onclick="document.getElementById('panelToggle').checked = false;">&times;</button>
-                <nav>
-                    <a href="/historialReserva">Historial de reservas</a>
-                    <a href="/chat">Chat</a>
-                    <a href="/gestionPropiedad">Gestión de propiedades</a>
-                </nav>
-            </div>
-            {% endif %}
         </div>
-        {% endif %}
+        {% endfor %}
+    </div>
 
-        <h1>Escapadas a tu medida</h1>
-        <form action="{% url 'buscar_alojamientos' %}" method="get" class="search-form">
-            <!-- Barra de búsqueda -->
-            <input type="text" name="query" placeholder="Buscar alojamientos..." value="{{ query }}"
-                class="search-input">
+    {% else %}
+    <p class="text-danger">No se encontraron resultados.</p>
+    {% endif %}
 
-            <!-- Filtros -->
-            <div class="filter-fields">
-                <label for="ubicacion">Ubicación:</label>
-                <input type="text" id="ubicacion" name="ubicacion" value="{{ form.ubicacion.value }}">
+    <h1>Escapadas a tu medida</h1>
+    <form action="{% url 'buscar_alojamientos' %}" method="get" class="search-form">
+        <!-- Barra de búsqueda -->
+        <input type="text" name="query" placeholder="Buscar alojamientos..." value="{{ query }}" class="search-input">
 
-                <label for="precio_min">Precio mínimo:</label>
-                <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
-                    value="{{ form.precio_min.value }}">
+        <!-- Filtros -->
+        <div class="filter-fields">
+            <label for="ubicacion">Ubicación:</label>
+            <input type="text" id="ubicacion" name="ubicacion" value="{{ form.ubicacion.value }}">
 
-                <label for="precio_max">Precio máximo:</label>
-                <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
-                    value="{{ form.precio_max.value }}">
+            <label for="precio_min">Precio mínimo:</label>
+            <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
+                value="{{ form.precio_min.value }}">
 
-                
+            <label for="precio_max">Precio máximo:</label>
+            <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
+                value="{{ form.precio_max.value }}">
+
+
+        </div>
+
+        <!-- Botones -->
+        <button type="submit" class="search-button">Buscar</button>
+    </form>
+
+    
+    <div class="dropdown filter-dropdown">
+        <!-- Botón para abrir el menú de filtros -->
+        <button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" id="filterDropdown"
+            data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #304a6e; color: white;">
+            Filtrar
+        </button>
+        <!-- Formulario de filtros dentro del menú desplegable -->
+        <form method="GET" action="{% url 'buscar_alojamientos' %}" class="dropdown-menu p-4"
+            aria-labelledby="filterDropdown" style="width: 400px;">
+
+            <div class="mb-3">
+                <label for="precio_min" class="form-label">Precio mínimo:</label>
+                <input type="number" id="precio_min" name="precio_min" step="0.01" min="0" class="form-control">
             </div>
 
-            <!-- Botones -->
-            <button type="submit" class="search-button">Buscar</button>
+            <div class="mb-3">
+                <label for="precio_max" class="form-label">Precio máximo:</label>
+                <input type="number" id="precio_max" name="precio_max" step="0.01" min="0" class="form-control">
+            </div>
+
+            <!-- Botón "Aplicar Filtros" para enviar el formulario -->
+            <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
         </form>
-
-        <nav>
-            {% if user.is_authenticated %}
-            <a href="/perfil/">{{ user.username }}</a>
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="search-button">Cerrar sesión</button>
-            </form>
-            {% else %}
-            <a href="/login/">Login</a>
-            <a href="/registro/">Registro</a>
-            {% endif %}
-        </nav>
     </div>
-</body>
+</div>
 
-<body>
 
-    <div class="container my-4">
-        <h1 class="text-decoration">Resultados de búsqueda</h1>
-
-        <div class="result-list mt-4">
-            {% if resultados %}
-            <ul class="list-group">
-                {% for propiedad in resultados %}
-                <li class="list-group-item">
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ propiedad.titulo }}</h5>
-                            <p class="card-text">{{ propiedad.descripcion }}</p>
-                        </div>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-danger">No se encontraron resultados.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- JavaScript de Bootstrap (opcional, solo si necesitas funcionalidad de Bootstrap) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
+{% endblock %}

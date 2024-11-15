@@ -1,7 +1,7 @@
 
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Propiedad, Imagen
+from .models import Propiedad, Imagen, Reserva
 
 class ImagenForm(forms.ModelForm):
     class Meta:
@@ -20,11 +20,21 @@ ImagenFormSet = inlineformset_factory(
 class PropiedadForm(forms.ModelForm):
     class Meta:
         model = Propiedad
-        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'disponible']
+        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'disponible_fecha_inicio', 'disponible_fecha_final']
 
 class FiltroAlojamientosForm(forms.Form):
     ubicacion = forms.CharField(max_length=255, required=False, label="Ubicación")
     precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
     disponible = forms.ChoiceField(choices=[('', 'Cualquiera'), ('true', 'Disponible'), ('false', 'No disponible')], required=False, label="Disponibilidad")
+
+
+class ReservaForm(forms.ModelForm):
+    class Meta:
+        model = Reserva
+        fields = ['fecha_inicio', 'fecha_fin']
+        widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
+        }
 

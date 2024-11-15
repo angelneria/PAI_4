@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            /* Eliminar margen predeterminado */
+            background-color: #f3f4f8;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Contenedor principal para centrar todo */
+        .container {
+            display: flex;
+            justify-content: center;
+            /* Centrado horizontal */
+            align-items: center;
+            /* Centrado vertical */
+            min-height: 100vh;
+            /* Esto asegura que ocupe toda la altura del viewport */
+            width: 100%;
+            margin: 0 auto;
+            /* Asegura que el contenedor ocupe el 100% del ancho de la pantalla */
+        }
+
+        /* Contenedor del formulario */
+        .login-container {
+            width: 100%;
+            /* Asegura que el contenedor ocupe todo el espacio disponible */
+            max-width: 500px;
+            /* Restringe el ancho máximo */
+            padding: 50px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+            /* Asegura que el padding no afecte el tamaño total */
+        }
+
+        .login-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-container h2 {
+            font-size: 30px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        label {
+            text-align: left;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            font-size: 16px;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 8px;
+            padding: 16px; /* Aumento de padding en el botón */
+            font-size: 18px; /* Botón más grande */
+            font-weight: 700;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            outline: none;
+            border:none;
+        }
+
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+
+        .messages {
+            color: #ff3333;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        p a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        p a:hover {
+            text-decoration: underline;
+        }
+
+        /* Botón de "X" fuera del contenedor */
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: transparent;
+            color: black;
+            padding: 10px 15px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <button class="close-btn" onclick="window.location.href='/'">
+        <i class="fas fa-home"></i>
+    </button>
+    <div class="container">
+        <div class="login-container">
+            <h2>Editar Perfil</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <p>
+                    Nota: si deseas cambiar tanto tu correo como tu contraseña,
+                    primero debes actualizar tu correo electrónico y guardar los cambios.
+                    Luego, vuelve a esta página para cambiar tu contraseña.
+                </p>
+                <button type="submit" class="btn-custom">Guardar Cambios</button>
+            </form>
+            <p>
+                ¿Quieres cambiar tu contraseña?
+                <a href="{{ cambio_contrasena_url }}">Haz clic aquí</a> para recibir un correo electrónico con las
+                instrucciones.
+            </p>
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

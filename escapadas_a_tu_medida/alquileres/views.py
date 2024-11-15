@@ -5,33 +5,44 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Propiedad, Imagen  
 from django.core.exceptions import PermissionDenied
-from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm
+from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm
 from django.forms import modelformset_factory
-
+from decimal import Decimal
+from datetime import date
 
 def home(request):
+    propiedades = Propiedad.objects.all()
     if request.user.is_authenticated:
         perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
+
     else:
         perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
     
-    return render(request, 'home.html', {'perfil_usuario': perfil_usuario})
+    return render(request, 'home.html', {'perfil_usuario': perfil_usuario, 'resultados':propiedades})
+
+
 
 @login_required
-def listar_propiedades(request):
-    if request.user.perfilusuario.es_anfitrion():
-        propiedades = Propiedad.objects.filter(propietario=request.user.perfilusuario)
+def crear_reserva(request, propiedad_id):
+    propiedad = Propiedad.objects.get(pk=propiedad_id)
+    
+    if request.method == 'POST':
+        reserva_form = ReservaForm(request.POST)
+        
+        if reserva_form.is_valid():
+            reserva = reserva_form.save(commit=False)
+            reserva.inquilino = request.user.perfilusuario  # Asocia la reserva al usuario actual
+            reserva.propiedad = propiedad  # Asocia la propiedad seleccionada
+            reserva.save()  # Guarda la reserva en la base de datos
+
+            return redirect('/')  # Redirige al detalle de la reserva creada
     else:
-        propiedades = Propiedad.objects.filter(disponible=True)
-    return render(request, 'alquileres/listar_propiedades.html', {'propiedades': propiedades})
+        reserva_form = ReservaForm()
 
-@login_required
-def reservar_propiedad(request, propiedad_id):
-    propiedad = Propiedad.objects.get(id=propiedad_id)
-    if request.user.perfilusuario.es_inquilino():
-        # lógica para reservar la propiedad
-        pass
-    return redirect('listar_propiedades')
+    return render(request, 'alquileres/crear_reserva.html', {
+        'reserva_form': reserva_form,
+        'propiedad': propiedad,
+    })
 
 
 def buscar_alojamientos(request):
@@ -76,6 +87,39 @@ def buscar_alojamientos(request):
 
 
 
+def buscar(request):
+    query = request.GET.get('query', '')
+    propiedades = Propiedad.objects.none()  # Inicializar siempre
+
+
+    if query:
+        # Buscar propiedades
+        propiedades = Propiedad.objects.filter(
+            Q(titulo__icontains=query) |
+            Q(descripcion__icontains=query) |
+            Q(ubicacion__icontains=query)
+        )
+
+        # Serializar resultados
+        resultados = []
+        for propiedad in propiedades:
+            resultados.append({
+                'id': propiedad.id,
+                'titulo': propiedad.titulo,
+                'ubicacion': propiedad.ubicacion,
+                'precio_por_noche': float(propiedad.precio_por_noche),  # Decimal a float
+            })
+
+        # Guardar en la sesión
+        request.session['resultados'] = resultados
+    else:
+        request.session['resultados'] = []
+
+    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query})
+
+
+
+
 
 @login_required
 def crear_propiedad(request):
@@ -92,7 +136,7 @@ def crear_propiedad(request):
             imagen_formset.instance = propiedad
             imagen_formset.save()
 
-            return redirect('/', pk=propiedad.pk)  # Redirige al detalle de la propiedad creada
+            return redirect('/')  # Redirige al detalle de la propiedad creada
     else:
         propiedad_form = PropiedadForm()
         imagen_formset = ImagenFormSet()

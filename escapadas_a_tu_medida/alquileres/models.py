@@ -1,5 +1,6 @@
 # alquileres/models.py
 
+import datetime
 from django.db import models
 from usuarios.models import PerfilUsuario
 
@@ -12,7 +13,8 @@ class Propiedad(models.Model):
     descripcion = models.TextField()
     ubicacion = models.CharField(max_length=255)
     precio_por_noche = models.DecimalField(max_digits=10, decimal_places=2)
-    disponible = models.BooleanField(default=True)
+    disponible_fecha_inicio= models.DateField(default=datetime.date(2024, 1, 1))
+    disponible_fecha_final = models.DateField(default=datetime.date(2024, 1, 1))
     
 
     def __str__(self):
