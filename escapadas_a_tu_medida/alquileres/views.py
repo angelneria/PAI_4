@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Propiedad, Imagen  
 from django.core.exceptions import PermissionDenied
-from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm
+from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm, FiltroAlojamientosHomeForm
 from django.forms import modelformset_factory
 from decimal import Decimal
 from datetime import date
@@ -18,7 +18,22 @@ def home(request):
     else:
         perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
     
-    return render(request, 'home.html', {'perfil_usuario': perfil_usuario, 'resultados':propiedades})
+    form = FiltroAlojamientosHomeForm(request.GET)  # Formulario para filtros detallados
+    if form.is_valid():
+        precio_min = form.cleaned_data.get('precio_min')
+        precio_max = form.cleaned_data.get('precio_max')
+        
+        # Filtro por precio mínimo
+        if precio_min is not None:
+            propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
+        
+        # Filtro por precio máximo
+        if precio_max is not None:
+            propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
+        
+
+    
+    return render(request, 'home.html', {'perfil_usuario': perfil_usuario, 'form': form, 'resultados':propiedades})
 
 
 
@@ -45,17 +60,17 @@ def crear_reserva(request, propiedad_id):
     })
 
 
-
-
-
 def buscar_alojamientos(request):
     form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
     query = request.GET.get('query', '')  # Obtener el término de búsqueda desde la barra de búsqueda
     propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
 
+    if request.user.is_authenticated:
+        perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
 
-
-
+    else:
+        perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
+    
     # Realizar la búsqueda inicial con el query si está presente    
     if query:
         propiedades = propiedades.filter(
@@ -66,13 +81,8 @@ def buscar_alojamientos(request):
 
     # Aplicar filtros del formulario si es válido
     if form.is_valid():
-        ubicacion = form.cleaned_data.get('ubicacion')
         precio_min = form.cleaned_data.get('precio_min')
         precio_max = form.cleaned_data.get('precio_max')
-
-        # Filtro por ubicación
-        if ubicacion:
-            propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
         
         # Filtro por precio mínimo
         if precio_min is not None:
@@ -85,34 +95,11 @@ def buscar_alojamientos(request):
 
     # Renderizar la plantilla con los resultados de la búsqueda y el formulario de filtros
     return render(request, 'buscar.html', {
+        'perfil_usuario': perfil_usuario,
         'form': form,
         'resultados': propiedades,
         'query': query,
     })
-
-
-def buscar(request):
-    query = request.GET.get('query', '')
-
-    if query:
-            # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
-            propiedades = Propiedad.objects.filter(
-                Q(titulo__icontains=query) |
-                Q(descripcion__icontains=query) |
-                Q(ubicacion__icontains=query)
-            )
-            
-
-    else:
-        propiedades = Propiedad.objects.none()
-
-    
-
-    
-
-
-    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query, })
-
 
 
 @login_required
