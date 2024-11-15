@@ -23,10 +23,9 @@ class PropiedadForm(forms.ModelForm):
         fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'disponible_fecha_inicio', 'disponible_fecha_final']
 
 class FiltroAlojamientosForm(forms.Form):
-    ubicacion = forms.CharField(max_length=255, required=False, label="Ubicación")
+    query = forms.CharField()
     precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
-    disponible = forms.ChoiceField(choices=[('', 'Cualquiera'), ('true', 'Disponible'), ('false', 'No disponible')], required=False, label="Disponibilidad")
 
 
 class ReservaForm(forms.ModelForm):
@@ -37,4 +36,3 @@ class ReservaForm(forms.ModelForm):
             'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
             'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
         }
-

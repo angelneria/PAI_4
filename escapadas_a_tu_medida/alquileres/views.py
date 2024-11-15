@@ -44,59 +44,74 @@ def crear_reserva(request, propiedad_id):
         'propiedad': propiedad,
     })
 
+
+
+
+
 def buscar_alojamientos(request):
-    form = FiltroAlojamientosForm(request.GET or None)
-
-    # Recuperar resultados de la sesión
-    resultados = request.session.get('resultados', [])
-
-    # Filtros
-    precio_min = request.GET.get('precio_min')
-    precio_max = request.GET.get('precio_max')
-
-    # Aplicar filtros sobre los diccionarios
-    if precio_min:
-        resultados = [r for r in resultados if r['precio_por_noche'] >= float(precio_min)]
-    if precio_max:
-        resultados = [r for r in resultados if r['precio_por_noche'] <= float(precio_max)]
-
-    return render(request, 'buscar.html', {
-        'form': form,
-        'resultados': resultados,
-    })
+    form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
+    query = request.GET.get('query', '')  # Obtener el término de búsqueda desde la barra de búsqueda
+    propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
 
 
-def buscar(request):
-    query = request.GET.get('query', '')
-    propiedades = Propiedad.objects.none()  # Inicializar siempre
 
 
+    # Realizar la búsqueda inicial con el query si está presente    
     if query:
-        # Buscar propiedades
-        propiedades = Propiedad.objects.filter(
+        propiedades = propiedades.filter(
             Q(titulo__icontains=query) |
             Q(descripcion__icontains=query) |
             Q(ubicacion__icontains=query)
         )
 
-        # Serializar resultados
-        resultados = []
-        for propiedad in propiedades:
-            resultados.append({
-                'id': propiedad.id,
-                'titulo': propiedad.titulo,
-                'ubicacion': propiedad.ubicacion,
-                'precio_por_noche': float(propiedad.precio_por_noche),  # Decimal a float
-            })
+    # Aplicar filtros del formulario si es válido
+    if form.is_valid():
+        ubicacion = form.cleaned_data.get('ubicacion')
+        precio_min = form.cleaned_data.get('precio_min')
+        precio_max = form.cleaned_data.get('precio_max')
 
-        # Guardar en la sesión
-        request.session['resultados'] = resultados
+        # Filtro por ubicación
+        if ubicacion:
+            propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
+        
+        # Filtro por precio mínimo
+        if precio_min is not None:
+            propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
+        
+        # Filtro por precio máximo
+        if precio_max is not None:
+            propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
+        
+
+    # Renderizar la plantilla con los resultados de la búsqueda y el formulario de filtros
+    return render(request, 'buscar.html', {
+        'form': form,
+        'resultados': propiedades,
+        'query': query,
+    })
+
+
+def buscar(request):
+    query = request.GET.get('query', '')
+
+    if query:
+            # Buscar en titulo, descripción y ubicación usando Q para combinar condiciones
+            propiedades = Propiedad.objects.filter(
+                Q(titulo__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(ubicacion__icontains=query)
+            )
+            
+
     else:
-        request.session['resultados'] = []
+        propiedades = Propiedad.objects.none()
 
-    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query})
+    
+
+    
 
 
+    return render(request, 'buscar.html', {'resultados': propiedades, 'query': query, })
 
 
 
