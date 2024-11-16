@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de propiedades{% endblock %}
+{% block navbar_custom_styles %}
+<style>
+    .navbar {
+        height: 250px;
+        /* Cambiar la altura solo en esta página */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% block search_bar %} {% endblock %}
+
+
+<div class="result-list mt-4">
+    {% if resultados %}
+    <div class="row row-cols-1 g-4"> <!-- Solo una tarjeta por fila -->
+        {% for propiedad in resultados %}
+        <div class="col mb-4"> <!-- La tarjeta ocupa toda la fila -->
+            <div class="card h-100 d-flex flex-column justify-content-between">
+                <!-- Imagen de la propiedad arriba -->
+                {% if propiedad.imagenes.first.imagen.url %}
+                <img src="{{ propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ propiedad.titulo }}"
+                    style="height: 300px; object-fit: cover;">
+                {% endif %}
+        
+                <div class="card-body">
+                    <!-- Contenido de la tarjeta (título, descripción, etc.) -->
+                    <h4 class="card-title">{{ propiedad.titulo }}</h4>
+                    <p class="card-text text-muted" style="font-size: 1rem;">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ propiedad.ubicacion }}
+                    </p>
+                    <p class="card-text text-muted" style="font-size: 1rem;">
+                        <i class="fas fa-money-bill me-2"></i>{{ propiedad.precio_por_noche }} €/noche
+                    </p>
+                </div>
+        
+                <!-- Contenedor de los botones -->
+                <div class="card-footer bg-white border-top-0 d-flex justify-content-end gap-2">
+                    <!-- Botón de Editar -->
+                    <a href="{% url 'editar_propiedad' propiedad.id %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+                    
+                    <!-- Botón de Eliminar -->
+                    <form action="{% url 'eliminar_propiedad' propiedad.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta propiedad?');">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <p class="text-danger">No se encontraron resultados.</p>
+    {% endif %}
+</div>
+
+
+
+
+
+{% endblock %}
