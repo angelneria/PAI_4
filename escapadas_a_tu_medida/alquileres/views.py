@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Propiedad, Reserva
 from usuarios.models import PerfilUsuario
 from django.contrib.auth.decorators import login_required
@@ -11,10 +11,14 @@ from decimal import Decimal
 from datetime import date
 from datetime import datetime
 from django.db import transaction
+from django.contrib import messages
+from django.utils.timezone import now
 
 
 def home(request):
     propiedades = Propiedad.objects.all()
+    dias_disponibles=[]
+    today= now().date()
     if request.user.is_authenticated:
         perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
 
@@ -33,10 +37,17 @@ def home(request):
         # Filtro por precio máximo
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
-        
-
+    propiedades_con_disponibilidad = []
+    for propiedad in propiedades:
+        # Obtener las fechas disponibles de hoy en adelante
+        disponibilidad = propiedad.disponibilidades.filter(fecha__gte=today).order_by('fecha')
+        propiedades_con_disponibilidad.append({
+            'propiedad': propiedad,
+            'disponibilidad': disponibilidad,  # Lista de objetos Disponibilidad
+            'dias_disponibles': disponibilidad.count()  # Contar los días
+        })
     
-    return render(request, 'home.html', {'perfil_usuario': perfil_usuario, 'form': form, 'resultados':propiedades})
+    return render(request, 'home.html', {'perfil_usuario': perfil_usuario, 'form': form, 'resultados':propiedades_con_disponibilidad})
 
 
 
@@ -168,5 +179,87 @@ def crear_propiedad(request):
         'propiedad_form': propiedad_form,
         'imagen_formset': imagen_formset,
     })
+
+@login_required
+def listar_propiedades_propietario(request):
+    
+    if request.user.is_authenticated:
+        perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
+
+    else:
+        perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
+    
+    usuario= request.user.perfilusuario.id
+    propiedades = Propiedad.objects.all().filter(propietario_id=usuario)
+
+    return render(request, 'alquileres/listar_propiedades.html', {'perfil_usuario': perfil_usuario, 'resultados': propiedades})
+
+@login_required
+def eliminar_propiedad(request, propiedad_id):
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_id)
+
+    if request.method == "POST":
+        propiedad.delete()
+        messages.success(request, "El propiedad se eliminó correctamente.")
+        return redirect('/gestionPropiedad/') 
+    return redirect('/gestionPropiedad/')  
+
+@login_required
+def actualizar_propiedad(request, propiedad_id):
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_id)
+
+    # Verificar que el usuario sea el propietario
+    if propiedad.propietario != request.user.perfilusuario:
+        return redirect('/')  # O redirige a una página de error o acceso denegado
+
+    if request.method == 'POST':
+        propiedad_form = PropiedadForm(request.POST, instance=propiedad)
+        imagen_formset = ImagenFormSet(request.POST, request.FILES, instance=propiedad)
+        fechas_disponibles = request.POST.get("fechas_disponibles", "")
+
+        if propiedad_form.is_valid() and imagen_formset.is_valid():
+            try:
+                with transaction.atomic():
+                    # Actualizar la propiedad
+                    propiedad = propiedad_form.save(commit=False)
+                    propiedad.propietario = request.user.perfilusuario
+                    propiedad.save()
+
+                    # Actualizar imágenes
+                    imagen_formset.instance = propiedad
+                    imagen_formset.save()
+                    if not propiedad.imagenes.exists():
+                        raise ValidationError("Cada propiedad debe tener al menos una imagen asociada.")
+
+                    # Actualizar fechas disponibles
+                    if fechas_disponibles:
+                        fechas_list = fechas_disponibles.split(",")
+                        # Eliminar fechas anteriores y agregar nuevas
+                        Disponibilidad.objects.filter(propiedad=propiedad).delete()
+                        for fecha in fechas_list:
+                            fecha_obj = datetime.strptime(fecha.strip(), "%Y-%m-%d").date()
+                            Disponibilidad.objects.create(propiedad=propiedad, fecha=fecha_obj)
+
+                    # Validar integridad del modelo
+                    propiedad.full_clean()
+
+                return redirect('/')  # Redirige a la página de detalle de la propiedad
+            except ValidationError as e:
+                propiedad_form.add_error(None, e)
+    else:
+        propiedad_form = PropiedadForm(instance=propiedad)
+        imagen_formset = ImagenFormSet(instance=propiedad)
+        # Obtener las fechas disponibles existentes como una cadena separada por comas
+        fechas_disponibles = ", ".join([
+            disponibilidad.fecha.strftime("%Y-%m-%d")
+            for disponibilidad in Disponibilidad.objects.filter(propiedad=propiedad)
+        ])
+
+    return render(request, 'alquileres/editar_propiedad.html', {
+        'propiedad_form': propiedad_form,
+        'imagen_formset': imagen_formset,
+        'fechas_disponibles': fechas_disponibles,  # Pasar las fechas existentes al template
+    })
+
 
 
