@@ -15,26 +15,34 @@
 <div class="result-list mt-4">
     {% if resultados %}
     <div class="row row-cols-1 g-4"> <!-- Solo una tarjeta por fila -->
-        {% for propiedad in resultados %}
+        {% for resultado in resultados %}
         <div class="col mb-4"> <!-- La tarjeta ocupa toda la fila -->
+            <a href="{% url 'mostrar_propiedad' resultado.propiedad.id %}" class="text-decoration-none text-dark">
             <div class="card">
                 <!-- Imagen de la propiedad arriba -->
-                {% if propiedad.imagenes.first.imagen.url %}
-                <img src="{{ propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ propiedad.titulo }}"
+                {% if resultado.propiedad.imagenes.first.imagen.url %}
+                <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
                     style="height: 300px; object-fit: cover;">
                 {% endif %}
 
                 <div class="card-body">
                     <!-- Contenido de la tarjeta (título, descripción, etc.) -->
-                    <h4 class="card-title">{{ propiedad.titulo }}</h4>
+                    <h4 class="card-title">{{ resultado.propiedad.titulo }}</h4>
                     <p class="card-text text-muted" style="font-size: 1rem;">
-                        <i class="fas fa-map-marker-alt me-2"></i>{{ propiedad.ubicacion }}
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
                     </p>
                     <p class="card-text text-muted" style="font-size: 1rem;">
-                        <i class="fas fa-money-bill me-2"></i>{{ propiedad.precio_por_noche }} €/noche
+                        <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }} €/noche
                     </p>
                 </div>
+
+                <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
+                        {{ resultado.dias_disponibles }} días disponibles
+                    </span>
+                </div>
             </div>
+        </a>
         </div>
         {% endfor %}
     </div>

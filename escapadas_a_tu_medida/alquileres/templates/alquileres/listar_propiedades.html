@@ -7,13 +7,28 @@
         height: 250px;
         /* Cambiar la altura solo en esta página */
     }
+
+
+    .custom-green {
+    background-color: #304a6e;
+    color: white;
+    border-color: #304a6e;
+    }
+
+    .custom-green:hover {
+        background-color: #16325e;
+        border-color: #16325e;
+        color: white;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 {% block search_bar %} {% endblock %}
 
-
+<a href="{% url 'crear_propiedad' %}" class="btn btn-sm custom-green">
+    <i class="bi bi-pencil-square"></i> Crear una propiedad
+</a>
 <div class="result-list mt-4">
     {% if resultados %}
     <div class="row row-cols-1 g-4"> <!-- Solo una tarjeta por fila -->
@@ -52,7 +67,10 @@
                         </button>
                     </form>
                 </div>
+
             </div>
+
+
         </div>
         
         {% endfor %}
@@ -61,6 +79,11 @@
     {% else %}
     <p class="text-danger">No se encontraron resultados.</p>
     {% endif %}
+
+    
+   
+    
+
 </div>
 
 

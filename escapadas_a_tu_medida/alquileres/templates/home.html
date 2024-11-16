@@ -10,6 +10,8 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for resultado in resultados %}
         <div class="col">
+            
+            <a href="{% url 'mostrar_propiedad' resultado.propiedad.id  %}" class="text-decoration-none text-dark">
             <div class="card mb-4">
                 <!-- Imagen de la propiedad arriba -->
                 {% if resultado.propiedad.imagenes.first.imagen.url %}
@@ -27,6 +29,9 @@
                             <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }}
                             €/noche
                         </p>
+
+
+
                         <div class="position-absolute top-0 end-0 m-3">
                             <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
                                 {{ resultado.dias_disponibles }} días disponibles
@@ -37,6 +42,8 @@
 
                 </div>
             </div>
+            </a>
+
             {% endfor %}
         </div>
         <div class="dropdown filter-dropdown">
