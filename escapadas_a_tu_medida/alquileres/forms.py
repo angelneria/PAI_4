@@ -21,7 +21,7 @@ ImagenFormSet = inlineformset_factory(
 class PropiedadForm(forms.ModelForm):
     class Meta:
         model = Propiedad
-        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche']
+        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'num_maximo_huespedes', 'num_maximo_habitaciones', 'servicios_disponibles']
 
 class FiltroAlojamientosForm(forms.Form):
     query = forms.CharField()

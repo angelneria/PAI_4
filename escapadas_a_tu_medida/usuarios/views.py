@@ -8,6 +8,7 @@ from .models import PerfilUsuario
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.contrib.auth import get_user_model
 
 
 def registro(request):
@@ -15,16 +16,28 @@ def registro(request):
         form = FormularioRegistroUsuario(request.POST)
         if form.is_valid():
             # Crear el usuario
-            usuario = form.save(commit=False)
-            usuario.set_password(form.cleaned_data["password"])
-            usuario.save()
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            
+            user = get_user_model().objects.create_user(
+                username=username, 
+                email=email, 
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
             
             # Crear el perfil adicional
             tipo_usuario = form.cleaned_data.get("tipo_usuario")
-            PerfilUsuario.objects.create(usuario=usuario, tipo_usuario=tipo_usuario)
+            telefono = form.cleaned_data.get("telefono")
+            PerfilUsuario.objects.create(usuario=user, tipo_usuario=tipo_usuario, telefono=telefono)
             
             # Iniciar sesión automáticamente después de registrarse
-            login(request, usuario)
+            login(request, user)
             # Redirige a la página inicial según el tipo de usuario
             return redirect("/")
     else:
