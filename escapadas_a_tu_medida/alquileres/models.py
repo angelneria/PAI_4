@@ -63,7 +63,6 @@ class Disponibilidad(models.Model):
 class Imagen(models.Model):
     propiedad = models.ForeignKey(Propiedad, on_delete=models.CASCADE, related_name='imagenes')  # Relación de muchas a uno con Propiedad
     imagen = models.ImageField(upload_to='propiedades/', blank=True)  # Campo para la imagen
-    descripcion = models.CharField(max_length=255, blank=True)  # Opcional: Descripción para la imagen
     
     def __str__(self):
         return f"Imagen de {self.propiedad.titulo}"

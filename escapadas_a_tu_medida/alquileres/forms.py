@@ -6,7 +6,7 @@ from .models import Propiedad, Imagen, Reserva
 class ImagenForm(forms.ModelForm):
     class Meta:
         model = Imagen
-        fields = ['imagen', 'descripcion']
+        fields = ['imagen']
 
 
 # Crear un formset para las imágenes asociadas a una propiedad
