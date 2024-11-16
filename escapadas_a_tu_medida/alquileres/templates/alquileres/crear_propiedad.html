@@ -130,6 +130,13 @@
                 <h3>Detalles de la Propiedad</h3>
                 {{ propiedad_form.as_p }}  <!-- Campo del formulario de Propiedad -->
             </div>
+            {% if propiedad_form.non_field_errors %}
+                <ul>
+                    {% for error in propiedad_form.non_field_errors %}
+                        <li style="color: red;">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
             
             <!-- Formulario para las Imágenes -->
             <div>
