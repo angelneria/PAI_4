@@ -117,6 +117,9 @@
                 {% endif %}
             </ul>
         </div>
+
+        {% block search_bar %} 
+
         <div class="container-fluid">
             <!-- Barra de búsqueda centrada en el navbar -->
             <div class="d-flex justify-content-center w-100">
@@ -127,13 +130,8 @@
                 
             </div>
         </div>
-        
-        
-        
-        
-        
-        
-        
+        {% endblock %}
+           
 </nav>
        <!-- Offcanvas para Inquilino -->
        {% if perfil_usuario.tipo_usuario == 'inquilino' %}
@@ -164,7 +162,7 @@
 
            <div class="offcanvas-body">
                <nav>
-                   <a href="/historialReserva" class="nav-link  fs-5 mb-3">Historial de reservas</a>
+                   <a href="{% url 'historial_reservas' %}" class="nav-link  fs-5 mb-3">Historial de reservas</a>
                    <a href="/chat" class="nav-link  fs-5 mb-3">Chat</a>
                    <a href="/gestionPropiedad" class="nav-link  fs-5 mb-3">Gestión de propiedades</a>
                </nav>

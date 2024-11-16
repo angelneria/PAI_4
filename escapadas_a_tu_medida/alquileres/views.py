@@ -62,6 +62,24 @@ def crear_reserva(request, propiedad_id):
         'propiedad': propiedad,
     })
 
+@login_required
+def historial_reservas(request):
+    perfil_usuario = request.user.perfilusuario
+    reservas = None  # Inicializamos reservas
+
+    # Verificamos el tipo de usuario
+    if perfil_usuario.tipo_usuario != "inquilino":  # Cambiado a !=
+        # Usamos la relación inversa para obtener las propiedades
+        propiedades = Propiedad.objects.filter(propietario=perfil_usuario)
+        reservas = Reserva.objects.filter(propiedad__in=propiedades)
+    else:
+        reservas = Reserva.objects.none()  # Si es inquilino, no hay propiedades asociadas
+
+    return render(request, 'alquileres/historial_reservas.html', {
+        'reservas': reservas,
+        'perfil_usuario': perfil_usuario,
+    })
+
 
 def buscar_alojamientos(request):
     form = FiltroAlojamientosForm(request.GET or None)  # Formulario para filtros detallados
