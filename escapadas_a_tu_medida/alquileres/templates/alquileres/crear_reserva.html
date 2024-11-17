@@ -15,14 +15,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f6f9;
-            min-height: 100vh;
-            margin: 0;
+        /* Establece la altura de la página completa */
+        body, html {
+            height: 100%;  /* Asegura que el body y html ocupen el 100% de la altura */
+            margin: 0;     /* Elimina los márgenes predeterminados */
+        }
+
+        /* Centrar el contenido de la página */
+        .container-fluid {
+            height: 100vh;  /* Hace que el contenedor ocupe toda la altura de la ventana */
             display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px; /* Espaciado lateral */
+
         }
 
         .crear-reserva-container {
@@ -31,19 +37,24 @@
             border-radius: 8px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 1200px;
-            margin: 20px;
+            max-width: 1000px; /* Aumenta el ancho máximo */
             position: relative;
-            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
         }
 
         h2, h3 {
             font-weight: 700;
             color: #333;
             text-align: center;
+            margin-bottom: 20px;
         }
+
         h2 {
-            margin-top: 40px; /* Margen superior para el título */
+            margin-top: 0; /* Elimina margen superior del título */
+
         }
 
         h3 {
@@ -55,28 +66,35 @@
             font-size: 16px;
             font-weight: 600;
             color: #333;
-            display: inline-block;
-            width: 180px; /* Ancho fijo para las etiquetas */
-            text-align: right;
-            margin-right: 20px;
+            display: block;  /* Cambia a block para que el texto esté encima del campo */
+            margin-bottom: 8px; /* Espaciado entre la etiqueta y el campo */
+            text-align: left;  /* Alinea a la izquierda */
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;  /* Aumenta el margen entre los campos */
             display: flex;
-            align-items: center;
+            flex-direction: column;
+
         }
 
         .form-control {
             width: 100%;
-            height: 40px;
+            height: 45px;  /* Aumenta la altura de los campos de entrada */
             border: 1px solid #ddd;
             border-radius: 5px;
-            padding: 8px;
+            padding: 10px;
+
             font-size: 16px;
             transition: height 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             font-family: 'Roboto', sans-serif;
         }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            border-color: #007bff;
+        }
+
 
         textarea {
             resize: none;
@@ -90,8 +108,10 @@
             color: #fff;
             border: none;
             border-radius: 5px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             transition: background-color 0.3s ease;
+            font-size: 18px;  /* Aumenta el tamaño del texto */
+
         }
 
         button[type="submit"]:hover {
@@ -124,60 +144,98 @@
             color: black;
         }
 
-        .container-fluid {
-            padding: 0;
+        .form-group input, .form-group textarea {
+            width: 100%;
+            height: 45px;
         }
 
-        /* Alinear los campos de entrada con etiquetas */
-        .form-group {
-            display: flex;
-            align-items: center;
-        }
-
-        .form-group label {
-            width: 180px;  /* Fijo para alinear todas las etiquetas */
-            text-align: right;
-        }
-
+        /* Para hacer que los inputs de tipo texto sean más altos */
         .form-group .form-control {
-            height: 40px;
-            flex-grow: 1;  /* Hace que el campo ocupe todo el espacio restante */
+            font-size: 16px;
         }
 
-        .form-group .form-control textarea {
-            height: 80px; /* Si es un textarea, le damos un alto inicial */
+        /* Asegura que el formulario sea responsive */
+        .form-group input, .form-group textarea {
+            width: 100%;
         }
+
+        /* Botón con un tamaño adecuado */
+        .btn-primary {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .custom-h3 {
+    font-size: 16px; /* Cambia el tamaño de la fuente */
+    font-weight: 600; /* Modifica el peso de la fuente */
+    margin-bottom: 10px; /* Ajusta el espacio debajo del h3 */
+    text-align: left;
+
+}
+
+
+
+
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
-    <div class="container-fluid crear-reserva-container">
-        <!-- Botón para cerrar con el ícono de casa a la izquierda -->
-        <button class="close-btn" onclick="window.location.href='/'">
-            <i class="fas fa-home"></i>
-        </button>
+    <div class="container-fluid">
+        <div class="crear-reserva-container">
+            <!-- Botón para cerrar con el ícono de casa a la izquierda -->
+            <button class="close-btn" onclick="window.location.href='/'">
+                <i class="fas fa-home"></i>
+            </button>
 
-        <h2 class="mb-4">Crear Nueva Reserva</h2>
-        <form method="POST">
-            {% csrf_token %}
-            
-            <!-- Detalles de la Propiedad -->
-            <div class="form-group">
-                <div class="col-12">
-                    {{ reserva_form.as_p }}
+            <h2 class="mb-4">Crear Nueva Reserva</h2>
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Detalles de la Propiedad -->
+                
+                <div class="form-group">
+                    <label for="{{ reserva_form.numero_huespedes.id_for_label }}">Número de huéspedes:</label>
+                    {{ reserva_form.numero_huespedes }}  <!-- Muestra el campo -->
+                    
+                    <!-- Muestra los errores solo si el campo tiene errores -->
+                    {% if reserva_form.numero_huespedes.errors %}
+                        <div class="text-danger">
+                            <!-- Mostrar cada error debajo del campo -->
+                            {% for error in reserva_form.numero_huespedes.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-            </div>
 
-            <button type="submit" class="btn w-100">Crear Reserva</button>
-        </form>
+                <div class="form-group">
+                    <h3 class="custom-h3">Seleccionar Fechas:</h3>
+                    <input type="text" id="fechas_escogidas" name="fechas_escogidas" placeholder="Selecciona las fechas" class="form-control" />
+                </div>
 
-        <!-- Mensajes de éxito o error -->
-        {% if messages %}
-            <div class="alert alert-info mt-4">
-                {% for message in messages %}
-                    <p class="mb-0">{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+                <button type="submit" class="btn btn-primary">Crear Reserva</button>
+            </form>
+
+
+        </div>
+
+        {% if request.method == "POST" %}
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field in form %}
+                    {% if field.errors %}
+                        <li>{{ field.label }}: {{ field.errors }}</li>
+                        {% endif %}
+                    {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endif %}
+
+
     </div>
 
     <!-- Bootstrap JS -->
@@ -186,11 +244,14 @@
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // Crecimiento dinámico de los textarea
-        document.querySelectorAll('textarea').forEach(function (textarea) {
-            textarea.addEventListener('input', function () {
-                this.style.height = '40px';
-                this.style.height = this.scrollHeight + 'px';
+        document.addEventListener("DOMContentLoaded", function() {
+            const fechasDisponiblesExistentes = "{{ fechas_disponibles }}".split(",").map(f => f.trim()); // Elimina espacios en blanco        
+
+            flatpickr("#fechas_escogidas", {
+                mode: "multiple", // Permitir seleccionar varias fechas
+                dateFormat: "Y-m-d", // Formato de fecha (año-mes-día)
+                enable: fechasDisponiblesExistentes,
+
             });
         });
     </script>

@@ -68,22 +68,43 @@ class Imagen(models.Model):
         return f"Imagen de {self.propiedad.titulo}"
 
 
+
+
 class Reserva(models.Model):
     propiedad = models.ForeignKey(Propiedad, on_delete=models.CASCADE)
     inquilino = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE, limit_choices_to={'tipo_usuario': 'inquilino'})
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
+    numero_huespedes = models.IntegerField()
+    fechas_reserva = models.JSONField(default=list)  # Almacena las fechas reservadas como una lista
     total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Calcula el total antes de guardar la reserva
+        # Validar que se seleccionaron fechas
+        if not self.fechas_reserva:
+            raise ValidationError("Debe seleccionar al menos una fecha para la reserva.")
+
+        # Verificar que las fechas están disponibles para la propiedad
+        fechas_seleccionadas = set(self.fechas_reserva)
+        disponibilidades = Disponibilidad.objects.filter(
+            propiedad=self.propiedad,
+            fecha__in=fechas_seleccionadas
+        )
+
+        if disponibilidades.count() != len(fechas_seleccionadas):
+            raise ValidationError("Una o más fechas seleccionadas no están disponibles.")
+
+        # Eliminar las fechas de la tabla de Disponibilidad
+        disponibilidades.delete()
+
+        # Calcular el total si no está definido
         if not self.total:
-            dias = (self.fecha_fin - self.fecha_inicio).days
-            self.total = dias * self.propiedad.precio_por_noche
+            self.total = len(fechas_seleccionadas) * self.propiedad.precio_por_noche
+
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Reserva de {self.inquilino} para {self.propiedad}"
+        fechas = ", ".join(self.fechas_reserva)
+        return f"Reserva de {self.inquilino} para {self.propiedad} en las fechas: {fechas}"
+
 
 class PropiedadesDeseadas(models.Model):
     inquilino = models.ManyToManyField(PerfilUsuario, related_name='propiedades_deseadas')

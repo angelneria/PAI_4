@@ -54,23 +54,35 @@ def home(request):
 @login_required
 def crear_reserva(request, propiedad_id):
     propiedad = Propiedad.objects.get(pk=propiedad_id)
+    fechas_escogidas = request.POST.get("fechas_escogidas", "") 
+    fechas_lista = fechas_escogidas.split(",")
+    fechas_lista = [fecha.strip() for fecha in fechas_lista]
     
     if request.method == 'POST':
-        reserva_form = ReservaForm(request.POST)
+        reserva_form = ReservaForm(request.POST, propiedad_id=propiedad.id)
         
         if reserva_form.is_valid():
             reserva = reserva_form.save(commit=False)
             reserva.inquilino = request.user.perfilusuario  # Asocia la reserva al usuario actual
             reserva.propiedad = propiedad  # Asocia la propiedad seleccionada
+            reserva.fechas_reserva = fechas_lista
             reserva.save()  # Guarda la reserva en la base de datos
 
             return redirect('/')  # Redirige al detalle de la reserva creada
     else:
-        reserva_form = ReservaForm()
+        reserva_form = ReservaForm(propiedad_id=propiedad.id)  # Pasa el id al formulario
+
+
+    fechas_disponibles = ", ".join([
+            disponibilidad.fecha.strftime("%Y-%m-%d")
+            for disponibilidad in Disponibilidad.objects.filter(propiedad=propiedad)
+        ])
 
     return render(request, 'alquileres/crear_reserva.html', {
         'reserva_form': reserva_form,
         'propiedad': propiedad,
+        'fechas_disponibles': fechas_disponibles,
+        'reserva_form': reserva_form
     })
 
 @login_required
@@ -343,4 +355,25 @@ def obtener_lista_deseos(request):
         'propiedades_deseadas': propiedades_deseadas,
         'perfil_usuario': perfil_usuario,
     })
+
+
+@login_required
+def eliminar_de_lista_deseos(request, propiedad_id):
+    # Obtén la propiedad que se desea eliminar de la lista de deseos
+    propiedad = get_object_or_404(Propiedad, id=propiedad_id)
+    
+    # Obtén el PerfilUsuario del usuario logueado
+    perfil_usuario = request.user.perfilusuario  # Suponiendo que 'perfilusuario' es un campo de relación en 'User'
+    
+    # Obtén la instancia de PropiedadesDeseadas para el usuario logueado
+    # Usamos filter() para obtener todas las listas de deseos asociadas al usuario
+    propiedades_deseadas = PropiedadesDeseadas.objects.filter(inquilino=perfil_usuario)
+    
+    # En este caso, podemos tener varias listas de deseos, pero supongo que un usuario tiene solo una lista activa
+    # Eliminamos la propiedad de la lista de deseos
+    for lista in propiedades_deseadas:
+        lista.propiedad.remove(propiedad)
+    
+    # Redirige de nuevo a la página de la lista de deseos
+    return redirect('/listaDeseos')  # Asegúrate de que esta vista esté bien configurada
 
