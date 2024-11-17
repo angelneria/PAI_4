@@ -12,6 +12,42 @@
 
 {% block content %}
 
+
+<div class="result-list mt-4">
+    {% if resultados %}
+    <div class="row row-cols-1 g-4"> <!-- Solo una tarjeta por fila -->
+        {% for resultado in resultados %}
+        <div class="col mb-4"> <!-- La tarjeta ocupa toda la fila -->
+            <a href="{% url 'mostrar_propiedad' resultado.propiedad.id %}" class="text-decoration-none text-dark">
+            <div class="card">
+                <!-- Imagen de la propiedad arriba -->
+                {% if resultado.propiedad.imagenes.first.imagen.url %}
+                <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
+                    style="height: 300px; object-fit: cover;">
+                {% endif %}
+
+                <div class="card-body">
+                    <!-- Contenido de la tarjeta (título, descripción, etc.) -->
+                    <h4 class="card-title">{{ resultado.propiedad.titulo }}</h4>
+                    <p class="card-text text-muted" style="font-size: 1rem;">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
+                    </p>
+                    <p class="card-text text-muted" style="font-size: 1rem;">
+                        <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }} €/noche
+                    </p>
+                </div>
+
+                <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
+                        {{ resultado.dias_disponibles }} días disponibles
+                    </span>
+                </div>
+            </div>
+        </a>
+        </div>
+        {% endfor %}
+    </div>
+
 <div class="container mt-4">
     <div class="row">
         <!-- Columna izquierda para el botón y filtros -->
@@ -44,6 +80,7 @@
                     </form>
                 </div>
 
+
                 <!-- Botón para quitar filtros -->
                 <a href="{% url 'buscar_alojamientos' %}?query={{ query }}" class="btn btn-outline-secondary w-100">
                     Quitar Filtros
@@ -51,37 +88,7 @@
             </div>
         </div>
         <!-- Lista de propiedades centrada -->
-        <div class="col">
-            <div class="result-list text-center">
-                {% if resultados %}
-                <div class="row row-cols-1 row-cols-md-3 g-4">
-                    {% for propiedad in resultados %}
-                    <div class="col {% if forloop.first %} align-self-start {% endif %}">
-                        <div class="card mb-4">
-                            {% if propiedad.imagenes.first.imagen.url %}
-                            <img src="{{ propiedad.imagenes.first.imagen.url }}" class="card-img-top"
-                                alt="{{ propiedad.titulo }}" style="height: 200px; object-fit: cover;">
-                            {% endif %}
-                            <div class="card-body">
-                                <h4 class="card-title">{{ propiedad.titulo }}</h4>
-                                <p class="card-text text-muted" style="font-size: 0.85rem;">
-                                    <i class="fas fa-map-marker-alt me-2"></i>{{ propiedad.ubicacion }}
-                                </p>
-                                <p class="card-text text-muted" style="font-size: 0.85rem;">
-                                    <i class="fas fa-money-bill me-2"></i>{{ propiedad.precio_por_noche }}
-                                    €/noche
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                
-                {% else %}
-                <p class="text-danger">No se encontraron resultados.</p>
-                {% endif %}
-            </div>
-        </div>
+        
     </div>
 </div>
 

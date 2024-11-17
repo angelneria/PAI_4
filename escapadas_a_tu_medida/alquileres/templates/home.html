@@ -23,12 +23,49 @@
                             <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
                                 class="form-control">
                         </div>
-
+                      
                         <div class="mb-3">
                             <label for="precio_max" class="form-label">Precio máximo:</label>
                             <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
                                 class="form-control">
+
                         </div>
+
+
+
+<div class="result-list mt-4">
+    {% if resultados %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for resultado in resultados %}
+        <div class="col">
+            
+            <a href="{% url 'mostrar_propiedad' resultado.propiedad.id  %}" class="text-decoration-none text-dark">
+            <div class="card mb-4">
+                <!-- Imagen de la propiedad arriba -->
+                {% if resultado.propiedad.imagenes.first.imagen.url %}
+                <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
+                    style="height: 200px; object-fit: cover;">
+                {% endif %}
+
+                <div class="card-body">
+                    <!-- Contenido de la tarjeta (título, descripción, etc.) -->
+                    <h4 class="card-title">{{ resultado.propiedad.titulo }}</h5>
+                        <p class="card-text text-muted" style="font-size: 0.85rem;">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
+                        </p>
+                        <p class="card-text text-muted" style="font-size: 0.85rem;">
+                            <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }}
+                            €/noche
+                        </p>
+
+
+
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
+                                {{ resultado.dias_disponibles }} días disponibles
+                            </span>
+
+
 
                         <!-- Botón "Aplicar Filtros" para enviar el formulario -->
                         <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
@@ -40,6 +77,11 @@
                     Quitar Filtros
                 </a>
             </div>
+
+            </a>
+
+            {% endfor %}
+
         </div>
         <!-- Lista de propiedades centrada -->
         <div class="col">

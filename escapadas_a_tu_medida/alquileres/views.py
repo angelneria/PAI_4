@@ -17,7 +17,6 @@ from django.utils.timezone import now
 
 def home(request):
     propiedades = Propiedad.objects.all()
-    dias_disponibles=[]
     today= now().date()
     if request.user.is_authenticated:
         perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
@@ -43,7 +42,6 @@ def home(request):
         disponibilidad = propiedad.disponibilidades.filter(fecha__gte=today).order_by('fecha')
         propiedades_con_disponibilidad.append({
             'propiedad': propiedad,
-            'disponibilidad': disponibilidad,  # Lista de objetos Disponibilidad
             'dias_disponibles': disponibilidad.count()  # Contar los días
         })
     
@@ -97,6 +95,9 @@ def buscar_alojamientos(request):
     query = request.GET.get('query', '')  # Obtener el término de búsqueda desde la barra de búsqueda
     propiedades = Propiedad.objects.all()  # Consulta inicial sin filtros
 
+    today= now().date()
+
+
     if request.user.is_authenticated:
         perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
 
@@ -123,13 +124,25 @@ def buscar_alojamientos(request):
         # Filtro por precio máximo
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
+
+
+
+
+    propiedades_con_disponibilidad = []
+    for propiedad in propiedades:
+        # Obtener las fechas disponibles de hoy en adelante
+        disponibilidad = propiedad.disponibilidades.filter(fecha__gte=today).order_by('fecha')
+        propiedades_con_disponibilidad.append({
+            'propiedad': propiedad,
+            'dias_disponibles': disponibilidad.count()  # Contar los días
+        })
         
 
     # Renderizar la plantilla con los resultados de la búsqueda y el formulario de filtros
     return render(request, 'buscar.html', {
         'perfil_usuario': perfil_usuario,
         'form': form,
-        'resultados': propiedades,
+        'resultados': propiedades_con_disponibilidad,
         'query': query,
     })
 
@@ -261,5 +274,28 @@ def actualizar_propiedad(request, propiedad_id):
         'fechas_disponibles': fechas_disponibles,  # Pasar las fechas existentes al template
     })
 
+
+
+def mostrar_detalles_propiedad(request, propiedad_id):
+    propiedad = get_object_or_404(Propiedad, pk=propiedad_id)
+    
+    if request.user.is_authenticated:
+        perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
+
+    else:
+        perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
+
+
+    fechas_disponibles = ", ".join([
+            disponibilidad.fecha.strftime("%Y-%m-%d")
+            for disponibilidad in Disponibilidad.objects.filter(propiedad=propiedad)
+        ])
+
+    return render(request, 'alquileres/mostrar_propiedad.html', {
+        'resultado':propiedad,
+        'perfil_usuario': perfil_usuario,
+        'fechas_disponibles': fechas_disponibles,
+
+    })
 
 
