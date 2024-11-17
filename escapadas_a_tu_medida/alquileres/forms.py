@@ -34,10 +34,30 @@ class FiltroAlojamientosHomeForm(forms.Form):
 
 
 class ReservaForm(forms.ModelForm):
+    numero_huespedes = forms.IntegerField(initial=1)
     class Meta:
         model = Reserva
-        fields = ['fecha_inicio', 'fecha_fin']
-        widgets = {
-            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['numero_huespedes']
+
+    def __init__(self, *args, **kwargs):
+        self.propiedad_id = kwargs.pop('propiedad_id', None)  # Extrae el id de la propiedad
+        super().__init__(*args, **kwargs)
+
+    def clean_numero_huespedes(self):
+        n_huespedes = self.cleaned_data.get('numero_huespedes',0)
+        
+        # Asegúrate de que la propiedad existe
+        try:
+            propiedad = Propiedad.objects.get(id=self.propiedad_id)
+        except Propiedad.DoesNotExist:
+            raise forms.ValidationError("La propiedad no existe.")
+
+        # Verifica si el número de huéspedes excede el máximo permitido
+        if propiedad.num_maximo_huespedes < n_huespedes:
+            raise forms.ValidationError("El número de huéspedes no puede ser mayor al permitido.")
+
+        return n_huespedes
+
+
+        
+
