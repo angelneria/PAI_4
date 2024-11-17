@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Búsqueda de propiedades{% endblock %}
+
 {% block navbar_custom_styles %}
 <style>
     .navbar {
@@ -12,41 +13,45 @@
 
 {% block content %}
 
-
 <div class="result-list mt-4">
     {% if resultados %}
     <div class="row row-cols-1 g-4"> <!-- Solo una tarjeta por fila -->
         {% for resultado in resultados %}
         <div class="col mb-4"> <!-- La tarjeta ocupa toda la fila -->
             <a href="{% url 'mostrar_propiedad' resultado.propiedad.id %}" class="text-decoration-none text-dark">
-            <div class="card">
-                <!-- Imagen de la propiedad arriba -->
-                {% if resultado.propiedad.imagenes.first.imagen.url %}
-                <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
-                    style="height: 300px; object-fit: cover;">
-                {% endif %}
+                <div class="card">
+                    <!-- Imagen de la propiedad arriba -->
+                    {% if resultado.propiedad.imagenes.first.imagen.url %}
+                    <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
+                        style="height: 300px; object-fit: cover;">
+                    {% endif %}
 
-                <div class="card-body">
-                    <!-- Contenido de la tarjeta (título, descripción, etc.) -->
-                    <h4 class="card-title">{{ resultado.propiedad.titulo }}</h4>
-                    <p class="card-text text-muted" style="font-size: 1rem;">
-                        <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
-                    </p>
-                    <p class="card-text text-muted" style="font-size: 1rem;">
-                        <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }} €/noche
-                    </p>
-                </div>
+                    <div class="card-body">
+                        <!-- Contenido de la tarjeta (título, descripción, etc.) -->
+                        <h4 class="card-title">{{ resultado.propiedad.titulo }}</h4>
+                        <p class="card-text text-muted" style="font-size: 1rem;">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
+                        </p>
+                        <p class="card-text text-muted" style="font-size: 1rem;">
+                            <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }} €/noche
+                        </p>
+                    </div>
 
-                <div class="position-absolute top-0 end-0 m-3">
-                    <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
-                        {{ resultado.dias_disponibles }} días disponibles
-                    </span>
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
+                            {{ resultado.dias_disponibles }} días disponibles
+                        </span>
+                    </div>
                 </div>
-            </div>
-        </a>
+            </a>
         </div>
         {% endfor %}
     </div>
+                    
+    {% else %}
+    <p class="text-danger">No se encontraron resultados.</p>
+    {% endif %}
+</div>
 
 <div class="container mt-4">
     <div class="row">
@@ -73,13 +78,13 @@
                             <label for="precio_max" class="form-label">Precio máximo:</label>
                             <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
                                 class="form-control">
+            
                         </div>
-
+                        <input type="hidden" name="query" value="{{ query }}">
                         <!-- Botón "Aplicar Filtros" para enviar el formulario -->
                         <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
                     </form>
                 </div>
-
 
                 <!-- Botón para quitar filtros -->
                 <a href="{% url 'buscar_alojamientos' %}?query={{ query }}" class="btn btn-outline-secondary w-100">
@@ -88,9 +93,7 @@
             </div>
         </div>
         <!-- Lista de propiedades centrada -->
-        
     </div>
 </div>
-
 
 {% endblock %}

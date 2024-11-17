@@ -23,92 +23,55 @@
                             <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
                                 class="form-control">
                         </div>
-                      
                         <div class="mb-3">
                             <label for="precio_max" class="form-label">Precio máximo:</label>
                             <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
                                 class="form-control">
-
                         </div>
-
-
-
-<div class="result-list mt-4">
-    {% if resultados %}
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for resultado in resultados %}
-        <div class="col">
-            
-            <a href="{% url 'mostrar_propiedad' resultado.propiedad.id  %}" class="text-decoration-none text-dark">
-            <div class="card mb-4">
-                <!-- Imagen de la propiedad arriba -->
-                {% if resultado.propiedad.imagenes.first.imagen.url %}
-                <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
-                    style="height: 200px; object-fit: cover;">
-                {% endif %}
-
-                <div class="card-body">
-                    <!-- Contenido de la tarjeta (título, descripción, etc.) -->
-                    <h4 class="card-title">{{ resultado.propiedad.titulo }}</h5>
-                        <p class="card-text text-muted" style="font-size: 0.85rem;">
-                            <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
-                        </p>
-                        <p class="card-text text-muted" style="font-size: 0.85rem;">
-                            <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }}
-                            €/noche
-                        </p>
-
-
-
-                        <div class="position-absolute top-0 end-0 m-3">
-                            <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">
-                                {{ resultado.dias_disponibles }} días disponibles
-                            </span>
-
-
-
                         <!-- Botón "Aplicar Filtros" para enviar el formulario -->
                         <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
                     </form>
                 </div>
-
                 <!-- Botón para quitar filtros -->
-                <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100">
-                    Quitar Filtros
-                </a>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary w-100">Quitar Filtros</a>
             </div>
-
-            </a>
-
-            {% endfor %}
-
         </div>
-        <!-- Lista de propiedades centrada -->
-        <div class="col">
-            <div class="result-list text-center">
+
+        <!-- Lista de propiedades -->
+        <div class="col-md-10" style="margin-left: auto; margin-right: auto;">
+            <div class="result-list text-center mt-4">
                 {% if resultados %}
-                <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="row row-cols-1 row-cols-md-3 g-4 d-flex justify-content-left">
                     {% for resultado in resultados %}
-                    <div class="col {% if forloop.first %} align-self-start {% endif %}">
-                        <div class="card mb-4">
-                            {% if resultado.propiedad.imagenes.first.imagen.url %}
-                            <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top"
-                                alt="{{ resultado.propiedad.titulo }}" style="height: 200px; object-fit: cover;">
-                            {% endif %}
-                            <div class="card-body">
-                                <h4 class="card-title">{{ resultado.propiedad.titulo }}</h4>
-                                <p class="card-text text-muted" style="font-size: 0.85rem;">
-                                    <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
-                                </p>
-                                <p class="card-text text-muted" style="font-size: 0.85rem;">
-                                    <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }}
-                                    €/noche
-                                </p>
+                    <div class="col d-flex align-items-stretch">
+                        <a href="{% url 'mostrar_propiedad' resultado.propiedad.id %}" class="text-decoration-none text-dark w-100">
+                            <div class="card h-100 mb-4">
+                                <div class="position-relative">
+                                    <!-- Imagen de la propiedad -->
+                                    {% if resultado.propiedad.imagenes.first.imagen.url %}
+                                    <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top"
+                                        alt="{{ resultado.propiedad.titulo }}" style="height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                    <!-- Badge -->
+                                    <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2 position-absolute top-0 end-0 m-2">
+                                        {{ resultado.dias_disponibles }} días disponibles
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ resultado.propiedad.titulo }}</h4>
+                                    <p class="card-text text-muted" style="font-size: 0.85rem;">
+                                        <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
+                                    </p>
+                                    <p class="card-text text-muted" style="font-size: 0.85rem;">
+                                        <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }} €/noche
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% endfor %}
                 </div>
+                
                 {% else %}
                 <p class="text-danger">No se encontraron resultados.</p>
                 {% endif %}
@@ -116,6 +79,4 @@
         </div>
     </div>
 </div>
-
-
 {% endblock %}
