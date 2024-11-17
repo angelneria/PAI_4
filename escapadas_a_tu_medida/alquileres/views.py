@@ -3,7 +3,7 @@ from .models import Propiedad, Reserva
 from usuarios.models import PerfilUsuario
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Propiedad, Imagen , Disponibilidad 
+from .models import Propiedad, Imagen , Disponibilidad , PropiedadesDeseadas
 from django.core.exceptions import PermissionDenied
 from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm, FiltroAlojamientosHomeForm
 from django.forms import ValidationError, modelformset_factory
@@ -13,6 +13,8 @@ from datetime import datetime
 from django.db import transaction
 from django.contrib import messages
 from django.utils.timezone import now
+from django.http import HttpResponseForbidden
+
 
 
 def home(request):
@@ -285,6 +287,8 @@ def mostrar_detalles_propiedad(request, propiedad_id):
     else:
         perfil_usuario = None  # Si no está autenticado, no intentamos obtener el perfil
 
+    ya_en_lista_deseos = PropiedadesDeseadas.objects.filter(inquilino=perfil_usuario, propiedad=propiedad).exists()
+
 
     fechas_disponibles = ", ".join([
             disponibilidad.fecha.strftime("%Y-%m-%d")
@@ -295,7 +299,44 @@ def mostrar_detalles_propiedad(request, propiedad_id):
         'resultado':propiedad,
         'perfil_usuario': perfil_usuario,
         'fechas_disponibles': fechas_disponibles,
+        'ya_en_lista_deseos': ya_en_lista_deseos,
 
     })
 
 
+def agregar_propiedad_deseada(request, propiedad_id):
+    
+    # Obtener el propietario y la propiedad a partir de los ID pasados por URL
+    inquilino = get_object_or_404(PerfilUsuario, id=request.user.perfilusuario.id)
+    propiedad = get_object_or_404(Propiedad, id=propiedad_id)
+
+    if inquilino.tipo_usuario== "inquilino":
+        # Crear el objeto de PropiedadesDeseadas (sin los campos adicionales)
+        propiedad_deseada = PropiedadesDeseadas.objects.create()
+
+        # Asociar el propietario y la propiedad a la propiedad deseada
+        propiedad_deseada.inquilino.add(inquilino)
+        propiedad_deseada.propiedad.add(propiedad)
+        return redirect('/')
+    
+    else:
+        # Si el usuario no es inquilino, retornar una respuesta de error
+        return HttpResponseForbidden("No tienes permiso para agregar propiedades a la lista de deseos.")
+
+
+@login_required
+def obtener_lista_deseos(request):
+    perfil_usuario = request.user.perfilusuario
+    reservas = None  # Inicializamos reservas
+
+    # Verificamos el tipo de usuario
+    if perfil_usuario.tipo_usuario == "inquilino":  # Cambiado a !=
+        # Usamos la relación inversa para obtener las propiedades
+        propiedades_deseadas = PropiedadesDeseadas.objects.filter(inquilino=perfil_usuario)
+    else:
+        propiedades_deseadas = PropiedadesDeseadas.objects.none()  # Si es inquilino, no hay propiedades asociadas
+
+    return render(request, 'alquileres/lista_deseos.html', {
+        'propiedades_deseadas': propiedades_deseadas,
+        'perfil_usuario': perfil_usuario,
+    })
