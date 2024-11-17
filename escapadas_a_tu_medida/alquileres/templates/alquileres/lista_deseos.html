@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Deseos{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4">Lista de Deseos</h1>
+    {% if propiedades_deseadas.exists %}
+        <div class="row row-cols-1 g-4">
+            {% for propiedad_deseada in propiedades_deseadas %}
+                {% for propiedad in propiedad_deseada.propiedad.all %}
+                <div class="col">
+                    <div class="card mb-4 d-flex flex-row-reverse align-items-center">
+                        <!-- Imagen de la propiedad -->
+                        <img src="{{ propiedad.imagenes.first.imagen.url }}" 
+                             alt="Imagen de {{ propiedad.titulo }}" 
+                             class="img-fluid" 
+                             style="max-width: 40%; height: auto; object-fit: cover;">
+
+                        <!-- Información de la propiedad -->
+                        <div class="card-body">
+                            <h4 class="card-title">{{ propiedad.titulo }}</h4>
+                            <p><strong>Ubicación:</strong> {{ propiedad.ubicacion }}</p>
+                            <p><strong>Precio por noche:</strong> {{ propiedad.precio_por_noche }} €</p>
+                            <p><strong>Descripción:</strong> {{ propiedad.descripcion }}</p>
+                            <p><strong>Máximo de huéspedes:</strong> {{ propiedad.num_maximo_huespedes }}</p>
+                            <p><strong>Servicios:</strong> {{ propiedad.servicios_disponibles }}</p>
+                            
+                            <!-- Botón de Pasar a Reserva -->
+                            <form action="{% url 'crear_reserva' propiedad.id %}" method="POST" class="mt-3">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-calendar-check me-2"></i> Pasar a Reserva
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No tienes propiedades en tu lista de deseos.</p>
+    {% endif %}
+</div>
+{% endblock %}

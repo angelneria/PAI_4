@@ -85,3 +85,10 @@ class Reserva(models.Model):
     def __str__(self):
         return f"Reserva de {self.inquilino} para {self.propiedad}"
 
+class PropiedadesDeseadas(models.Model):
+    inquilino = models.ManyToManyField(PerfilUsuario, related_name='propiedades_deseadas')
+    propiedad = models.ManyToManyField(Propiedad, related_name='propiedades_deseadas')
+
+
+    def str(self):
+        return f"{', '.join([str(p) for p in self.propiedad.all()])} - {', '.join([i.usuario.nombre for i in self.inquilino.all()])}"
