@@ -14,67 +14,71 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <!-- FontAwesome for the Home Icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f4f6f9;
-            min-height: 100vh;
+            background-color: #f7f9fc;
             margin: 0;
+            padding: 0;
             display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        .crear-propiedad-container {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 1200px;
-            margin: 20px;
-        }
-
-        h2, h3 {
-            font-weight: 700;
+        /* Cabecera */
+        .header-section {
+            background-color: #ffffff;
             color: #333;
             text-align: center;
+            padding: 25px 20px;
+            border-bottom: 2px solid #ddd;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        h3 {
-            font-size: 1.25rem;
-            margin-bottom: 15px;
+        .header-section .title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
         }
 
-        input[type="text"], input[type="number"], input[type="email"], textarea, select {
+        .header-section .subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #7f8c8d;
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex-grow: 1; /* Hace que el contenido crezca y ocupe el espacio disponible */
+        }
+
+        .tab-content {
+            padding: 20px;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #304a6e;
+            color: white;
+        }
+
+        input[type="text"], input[type="number"], textarea, select, input[type="file"] {
             width: 100%;
-            height: 40px;
+            margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            padding: 8px;
+            padding: 10px;
             font-size: 16px;
-            transition: height 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        textarea {
-            resize: none;
-            overflow: hidden;
-        }
-
-        button[type="submit"] {
-            margin-top: 20px;
-            font-weight: 500;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #304a6e;
-            color: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         input:focus, textarea:focus, select:focus {
@@ -83,53 +87,126 @@
             box-shadow: 0 0 4px rgba(48, 74, 110, 0.4);
         }
 
+        textarea {
+            resize: none;
+            overflow: hidden;
+        }
+
+        .footer-button {
+            background-color: #304a6e;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px 0;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilo para el botón */
+        .btn-create-property {
+            background-color: #007bff;
+            color: #fff;
+            padding: 12px 30px; 
+            font-weight: 500;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-create-property:hover {
+            background-color: #0056b3;
+        }
+
         #preview-container img {
             max-width: 100px;
             margin-right: 10px;
-            margin-top: 10px;
+            margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 5px;
         }
+
+        /* Botón de cerrar */
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .close-btn i {
+            color: #333;
+        }
+
     </style>
 </head>
 <body>
-    <div class="container-fluid crear-propiedad-container">
-        <h2 class="mb-4">Crear Nueva Propiedad</h2>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
+    <!-- Botón de Cerrar -->
+    <button class="close-btn" onclick="window.location.href='/'">
+        <i class="fas fa-home"></i>
+    </button>
 
-            <!-- Detalles de la Propiedad -->
-            <div class="mb-4">
-                <h3>Detalles de la Propiedad</h3>
-                {{ propiedad_form.as_p }}
-            </div>
-
-            <!-- Selección de Fechas -->
-            <div class="mb-4">
-                <h3>Seleccionar Fechas Disponibles</h3>
-                <input type="text" id="fechas_disponibles" name="fechas_disponibles" class="form-control" placeholder="Selecciona las fechas">
-            </div>
-
-            <!-- Imágenes de la Propiedad -->
-            <div class="mb-4">
-                <h3>Imágenes de la Propiedad (puedes subir hasta 10)</h3>
-                <input type="file" name="imagenes" id="imagenes" class="form-control" accept="image/*" multiple>
-                <div id="preview-container" class="mt-3 d-flex flex-wrap"></div>
-            </div>
-
-            <button type="submit" class="btn w-100">Crear Propiedad</button>
-        </form>
-
-        {% if messages %}
-            <div class="alert alert-info mt-4">
-                {% for message in messages %}
-                    <p class="mb-0">{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+    <!-- Cabecera -->
+    <div class="header-section">
+        <div class="title">Crear Nueva Propiedad</div>
+        <div class="subtitle">Complete la información para crear una nueva propiedad</div>
     </div>
 
+    <!-- Formulario -->
+    <div class="container">
+        <ul class="nav nav-tabs" id="formTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="detalles-tab" data-bs-toggle="tab" data-bs-target="#detalles" type="button" role="tab" aria-controls="detalles" aria-selected="true">Detalles</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fechas-tab" data-bs-toggle="tab" data-bs-target="#fechas" type="button" role="tab" aria-controls="fechas" aria-selected="false">Fechas Disponibles</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="imagenes-tab" data-bs-toggle="tab" data-bs-target="#imagenes" type="button" role="tab" aria-controls="imagenes" aria-selected="false">Imágenes</button>
+            </li>
+        </ul>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="tab-content">
+                <!-- Detalles -->
+                <div class="tab-pane fade show active" id="detalles" role="tabpanel" aria-labelledby="detalles-tab">
+                    <h3>Detalles de la Propiedad</h3>
+                    {{ propiedad_form.as_p }}
+                </div>
+
+                <!-- Fechas -->
+                <div class="tab-pane fade" id="fechas" role="tabpanel" aria-labelledby="fechas-tab">
+                    <h3>Seleccionar Fechas Disponibles</h3>
+                    <input type="text" id="fechas_disponibles" name="fechas_disponibles" class="form-control" placeholder="Selecciona las fechas">
+                </div>
+
+                <!-- Imágenes -->
+                <div class="tab-pane fade" id="imagenes" role="tabpanel" aria-labelledby="imagenes-tab">
+                    <h3>Imágenes de la Propiedad</h3>
+                    <input type="file" name="imagenes" id="imagenes" class="form-control" accept="image/*" multiple>
+                    <div id="preview-container" class="mt-3 d-flex flex-wrap"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Botón Fijo al Final -->
+    <div class="footer-button" onclick="document.querySelector('form').submit()">Crear Propiedad</div>
+    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -137,21 +214,21 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         // Flatpickr inicialización
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             flatpickr("#fechas_disponibles", {
                 mode: "multiple",
                 dateFormat: "Y-m-d",
             });
         });
 
-        // Previsualizar imágenes seleccionadas
+        // Previsualización de imágenes
         document.getElementById('imagenes').addEventListener('change', function (event) {
             const previewContainer = document.getElementById('preview-container');
-            previewContainer.innerHTML = ''; // Limpiar el contenedor
+            previewContainer.innerHTML = '';
             const files = event.target.files;
             if (files.length > 10) {
                 alert('No puedes subir más de 10 imágenes.');
-                event.target.value = ''; // Limpiar el campo si excede el límite
+                event.target.value = '';
                 return;
             }
             Array.from(files).forEach(file => {
