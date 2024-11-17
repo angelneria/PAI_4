@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Propiedad {{ resultado.titulo }}{% endblock %}
+
+{% block search_bar %} {% endblock %}
+
+{% block navbar_custom_styles %}
+
+<head>
+    <style>
+        .navbar {
+            height: 150px;
+            /* Cambiar la altura solo en esta página */
+        }
+
+        /* Ajustar el tamaño de las imágenes del carrusel */
+        .carousel-inner img {
+            max-height: 700px;
+            /* Limitar la altura máxima de las imágenes */
+
+            object-fit: scale-down;
+            /* Asegurarse de que las imágenes cubran el área sin distorsionarse */
+        }
+
+        /* Ajustar el calendario */
+        #calendario-disponibilidades {
+            width: 100%;
+            max-width: 900px;
+            margin-top: 40px;
+            /* Añadir espacio entre los detalles y el calendario */
+            font-size: 30px;
+            /* Aumentar el tamaño de las letras dentro del contenedor */
+
+        }
+
+        /* Aumentar tamaño general del calendario */
+        .flatpickr-calendar {
+            font-size: 20px;
+            /* Aumentar el tamaño de la fuente */
+            width: 90% !important;
+            /* Hacerlo más ancho */
+            max-width: 1000px;
+            /* Ajustar el tamaño máximo */
+            padding: 20px;
+            /* Añadir padding para que no se vea apretado */
+        }
+
+        /* Hacer más grandes las celdas de los días */
+        .flatpickr-day {
+            font-size: 18px !important;
+            /* Aumentar tamaño de las fechas */
+            width: 35px !important;
+            /* Aumentar el ancho de las celdas */
+            height: 35px !important;
+            /* Aumentar el alto de las celdas */
+        }
+
+        /* Aumentar el tamaño de la fecha de hoy */
+        .flatpickr-day.today {
+            background-color: #ffc107 !important;
+            color: white !important;
+            font-size: 22px;
+            /* Aumentar tamaño solo para la fecha de hoy */
+        }
+
+        /* Aumentar tamaño de los títulos de los meses */
+        .flatpickr-month {
+            font-size: 10px;
+            /* Aumentar tamaño del mes */
+        }
+
+        /* Aumentar tamaño de los botones de navegación */
+        .flatpickr-prev-month,
+        .flatpickr-next-month {
+            font-size: 10px;
+            /* Aumentar tamaño de los botones */
+        }
+
+        /* Aumentar tamaño de los números de los días */
+        .flatpickr-day:hover {
+            background-color: #e7e7e7 !important;
+            /* Resaltar al pasar el ratón */
+
+
+        }
+
+        .flatpickr-rContainer {
+            font-size: 20px !important;
+            /* Aumentar el tamaño de la fuente */
+            padding: 20px !important;
+            /* Añadir padding para mayor espacio */
+        }
+
+        .flatpickr-current-month {
+            font-size: 20px !important;
+            /* Aumentar el tamaño del mes actual */
+            font-weight: bold !important;
+            /* Hacer el mes actual más destacado */
+            padding: 10px 20px !important;
+            /* Añadir más espacio alrededor del mes */
+        }
+
+
+        .flatpickr-day.selected {
+            pointer-events: none;
+        }
+
+        .flatpickr-day {
+            cursor: not-allowed;
+            color: rgba(57, 57, 57, 0.1);
+
+        }
+
+
+        /* Para hacer el botón más oscuro cuando está sobre un fondo claro */
+        .carousel-control-prev {
+
+            border-color: rgba(0, 0, 0, 0.5);
+            /* Cambiar el borde para adaptarse */
+        }
+
+        /* Si el fondo es oscuro, puedes usar un color más claro */
+        .carousel-control-prev-icon {
+            filter: invert(100%);
+            /* Invertir el color de los iconos */
+        }
+
+
+        .carousel-control-next {
+            border-color: rgba(0, 0, 0, 0.5);
+            /* Cambiar el borde para adaptarse */
+        }
+
+        /* Si el fondo es oscuro, puedes usar un color más claro */
+        .carousel-control-next-icon {
+            filter: invert(100%);
+            /* Invertir el color de los iconos */
+        }
+
+
+        /* Centrar el contenedor del calendario */
+        #contenedor-calendario {
+            display: flex;
+            flex-direction: column;
+            /* Coloca el título y el calendario en columna */
+            align-items: center;
+            /* Centra los elementos horizontalmente */
+            justify-content: center;
+            /* Centra los elementos verticalmente */
+            margin-top: 15px;
+        }
+
+        #calendario-disponibilidades {
+            margin-top: 8px;
+            /* Espaciado entre el título y el calendario */
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Imágenes de la propiedad -->
+        <div class="col-md-8">
+            <div id="carouselPropiedad" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for imagen in resultado.imagenes.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ imagen.imagen.url }}" class="d-block w-100" alt="Imagen de {{ resultado.titulo }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselPropiedad"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselPropiedad"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+            </div>
+            {% if perfil_usuario.tipo_usuario == 'inquilino' %}
+            {% if not ya_en_lista_deseos %}
+            <div class="btn-container mt-5"> <!-- Se añadió mt-5 para mayor separación -->
+                <form action="{% url 'agregar_lista_deseos' resultado.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg btn-agregar-deseos w-100"> <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
+                        <i class="fas fa-check-circle me-2"></i> Añadir a la lista de deseos
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="alert alert-success mt-3" role="alert">
+                <i class="fas fa-check-circle me-2"></i> ¡Ya has añadido esta propiedad a tu lista de deseos!
+            </div> 
+            {% endif %}
+            {% endif %}
+        </div>
+        
+        <!-- Información de la propiedad -->
+        <div class="col-md-4">
+            <h1>{{ resultado.titulo }}</h1>
+            <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>{{ resultado.ubicacion }}</p>
+            <p class="fs-4 fw-bold text-success">{{ resultado.precio_por_noche }} €/noche</p>
+            <p>{{ resultado.descripcion }}</p>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Máximo de huéspedes:</strong> {{ resultado.num_maximo_huespedes }}
+                </li>
+                <li class="list-group-item"><strong>Máximo de habitaciones:</strong>
+                    {{resultado.num_maximo_habitaciones}}</li>
+                <li class="list-group-item"><strong>Servicios disponibles:</strong> {{resultado.servicios_disponibles}}
+                </li>
+            </ul>
+
+            <!-- Calendario de disponibilidad -->
+            <div id="contenedor-calendario" class="text-center">
+                <h3>Fechas Disponibles</h3>
+                <div id="calendario-disponibilidades"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("{{ fechas_disponibles }}")
+
+        const fechasDisponiblesExistentes = "{{ fechas_disponibles }}".split(",").map(f => f.trim()); // Elimina espacios en blanco        
+        flatpickr("#calendario-disponibilidades", {
+            mode: "multiple", // Permitir seleccionar varias fechas
+
+            dateFormat: "Y-m-d", // Formato de fecha (año-mes-día)
+            defaultDate: fechasDisponiblesExistentes,
+            inline: true, // Mostrar el calendario directamente
+            locale: "es", // Idioma español
+            disable: [
+                function (date) {
+                    // Convertir la fecha del calendario a "Y-m-d"
+                    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    // Si no está en las fechas disponibles, deshabilitarla
+                    return !fechasDisponiblesExistentes.includes(formattedDate);
+                }
+            ],
+
+
+
+            onDayCreate: function (dObj, dStr, instance) {
+                // Deshabilitar la interacción con las fechas ya seleccionadas
+                if (fechasDisponiblesExistentes.includes(dStr)) {
+                    dObj.classList.add("flatpickr-selected"); // Marca la fecha como seleccionada
+                    dObj.style.pointerEvents = "none"; // Deshabilitar la interacción
+                    dObj.style.backgroundColor = "#28a745"; // Color verde para las fechas seleccionadas
+                    dObj.style.color = "white"; // Texto blanco
+                }
+            }
+        });
+    });
+</script>
+
+
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de reservas{% endblock %}
+
+{% block content %}
+{% block navbar_custom_styles %}
+<style>
+    .navbar {
+        height: 250px;
+        /* Cambiar la altura solo en esta página */
+    }
+</style>
+{% endblock %}
+{% block search_bar %} {% endblock %}
+
+
+<div class="container my-4">
+    {% if reservas %}
+    <div class="row row-cols-1 g-4">
+        {% for reserva in reservas %}
+        <div class="col">
+            <div class="card mb-4" style="display: flex; flex-direction: row; align-items: center; padding: 1rem;">  
+                <!-- Información de la propiedad -->
+                <div class="card-body">
+                    <h4 class="card-title">{{ reserva.propiedad.titulo }}</h4>
+                    <p class="card-text text-muted" style="font-size: 0.85rem;">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ reserva.propiedad.ubicacion }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No hay reservas disponibles.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
