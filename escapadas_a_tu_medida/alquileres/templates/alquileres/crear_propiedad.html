@@ -21,29 +21,18 @@
             min-height: 100vh;
             margin: 0;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: flex-start;
         }
 
         .crear-propiedad-container {
-            margin-top: 50px;
             background-color: #fff;
             padding: 40px;
             border-radius: 8px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
             width: 100%;
-            max-width: 1500px;
-        }
-
-        .formulario-detalles {
-            flex: 1 1 60%; /* Ocupa 60% del ancho */
-        }
-
-        .formulario-imagenes {
-            flex: 1 1 35%; /* Ocupa 35% del ancho */
+            max-width: 1200px;
+            margin: 20px;
         }
 
         h2, h3 {
@@ -65,7 +54,6 @@
             padding: 8px;
             font-size: 16px;
             transition: height 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-            font-family: 'Roboto', sans-serif;
         }
 
         textarea {
@@ -74,6 +62,7 @@
         }
 
         button[type="submit"] {
+            margin-top: 20px;
             font-weight: 500;
             background-color: #007bff;
             color: #fff;
@@ -94,90 +83,51 @@
             box-shadow: 0 0 4px rgba(48, 74, 110, 0.4);
         }
 
-        .alert-info {
-            background-color: #e6eef7;
-            color: #304a6e;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-        }
-
-        .close-btn i {
-            color: black;
-        }
-
-        .submit-btn-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: auto; /* Empuja el botón hacia abajo */
+        #preview-container img {
+            max-width: 100px;
+            margin-right: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
         }
     </style>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <button class="close-btn" onclick="window.location.href='/'">
-        <i class="fas fa-home"></i>
-    </button>
     <div class="container-fluid crear-propiedad-container">
-        <div class="formulario-detalles">
-            <h2 class="mb-4">Crear Nueva Propiedad</h2>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
+        <h2 class="mb-4">Crear Nueva Propiedad</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-                <!-- Detalles de la Propiedad -->
-                <div class="mb-4">
-                    <h3>Detalles de la Propiedad</h3>
-                    {{ propiedad_form.as_p }}
-                </div>
-                {% if propiedad_form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            {% for error in propiedad_form.non_field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-                
-                <!-- Selección de Fechas -->
-                <div class="mb-4">
-                    <h3>Seleccionar Fechas Disponibles</h3>
-                    <input type="text" id="fechas_disponibles" name="fechas_disponibles" class="form-control" placeholder="Selecciona las fechas">
-                </div>
+            <!-- Detalles de la Propiedad -->
+            <div class="mb-4">
+                <h3>Detalles de la Propiedad</h3>
+                {{ propiedad_form.as_p }}
+            </div>
 
-                <!-- Mensajes de éxito o error -->
-                {% if messages %}
-                    <div class="alert alert-info mt-4">
-                        {% for message in messages %}
-                            <p class="mb-0">{{ message }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </form>
-        </div>
+            <!-- Selección de Fechas -->
+            <div class="mb-4">
+                <h3>Seleccionar Fechas Disponibles</h3>
+                <input type="text" id="fechas_disponibles" name="fechas_disponibles" class="form-control" placeholder="Selecciona las fechas">
+            </div>
 
-        <div class="formulario-imagenes">
-            <h3>Imágenes de la Propiedad (máximo 10)</h3>
-            {{ imagen_formset.management_form }}
-            {% for form in imagen_formset %}
-                <div class="mb-3 p-3 border rounded">
-                    {{ form.as_p }}
-                </div>
-            {% endfor %}
-        </div>
+            <!-- Imágenes de la Propiedad -->
+            <div class="mb-4">
+                <h3>Imágenes de la Propiedad (puedes subir hasta 10)</h3>
+                <input type="file" name="imagenes" id="imagenes" class="form-control" accept="image/*" multiple>
+                <div id="preview-container" class="mt-3 d-flex flex-wrap"></div>
+            </div>
 
-        <!-- Botón de submit alineado a la derecha y en la parte inferior -->
-        <div class="submit-btn-container">
-            <button type="submit" class="btn">Crear Propiedad</button>
-        </div>
+            <button type="submit" class="btn w-100">Crear Propiedad</button>
+        </form>
+
+        {% if messages %}
+            <div class="alert alert-info mt-4">
+                {% for message in messages %}
+                    <p class="mb-0">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 
     <!-- Bootstrap JS -->
@@ -194,11 +144,24 @@
             });
         });
 
-        // Crecimiento dinámico de los textarea
-        document.querySelectorAll('textarea').forEach(function (textarea) {
-            textarea.addEventListener('input', function () {
-                this.style.height = '40px';
-                this.style.height = this.scrollHeight + 'px';
+        // Previsualizar imágenes seleccionadas
+        document.getElementById('imagenes').addEventListener('change', function (event) {
+            const previewContainer = document.getElementById('preview-container');
+            previewContainer.innerHTML = ''; // Limpiar el contenedor
+            const files = event.target.files;
+            if (files.length > 10) {
+                alert('No puedes subir más de 10 imágenes.');
+                event.target.value = ''; // Limpiar el campo si excede el límite
+                return;
+            }
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
             });
         });
     </script>
