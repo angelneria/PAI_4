@@ -167,22 +167,25 @@ def buscar_alojamientos(request):
 def crear_propiedad(request):
     if request.method == 'POST':
         propiedad_form = PropiedadForm(request.POST)
-        imagen_formset = ImagenFormSet(request.POST, request.FILES)  # Importante pasar request.FILES
+        # imagen_formset = ImagenFormSet(request.POST, request.FILES)  # Importante pasar request.FILES
         fechas_disponibles = request.POST.get("fechas_disponibles", "")  # Obtener las fechas del formulario
 
-        if propiedad_form.is_valid() and imagen_formset.is_valid():
+        imagenes = request.FILES.getlist('imagenes')  # Obtener múltiples imágenes del campo de entrada
+
+        if propiedad_form.is_valid():
             try:
                 with transaction.atomic():
-                    # Crear la propiedad
+                    # Guardar la propiedad
                     propiedad = propiedad_form.save(commit=False)
                     propiedad.propietario = request.user.perfilusuario
                     propiedad.save()
 
-                    # Asociar imágenes y validar la relación
-                    imagen_formset.instance = propiedad
-                    imagen_formset.save()
-                    if not propiedad.imagenes.exists():
-                        raise ValidationError("Cada propiedad debe tener al menos una imagen asociada.")
+                    # Guardar las imágenes
+                    if len(imagenes) > 10:
+                        raise ValidationError("No puedes subir más de 10 imágenes.")
+
+                    for imagen in imagenes:
+                        Imagen.objects.create(propiedad=propiedad, imagen=imagen)
 
                     # Guardar fechas disponibles
                     if fechas_disponibles:
@@ -354,7 +357,6 @@ def obtener_lista_deseos(request):
     })
 
 
-
 @login_required
 def eliminar_de_lista_deseos(request, propiedad_id):
     # Obtén la propiedad que se desea eliminar de la lista de deseos
@@ -374,3 +376,4 @@ def eliminar_de_lista_deseos(request, propiedad_id):
     
     # Redirige de nuevo a la página de la lista de deseos
     return redirect('/listaDeseos')  # Asegúrate de que esta vista esté bien configurada
+

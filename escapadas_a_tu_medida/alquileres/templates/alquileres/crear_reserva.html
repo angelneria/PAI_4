@@ -28,6 +28,7 @@
             justify-content: center;
             align-items: center;
             padding: 0 20px; /* Espaciado lateral */
+
         }
 
         .crear-reserva-container {
@@ -41,6 +42,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+
         }
 
         h2, h3 {
@@ -52,6 +54,7 @@
 
         h2 {
             margin-top: 0; /* Elimina margen superior del título */
+
         }
 
         h3 {
@@ -72,6 +75,7 @@
             margin-bottom: 25px;  /* Aumenta el margen entre los campos */
             display: flex;
             flex-direction: column;
+
         }
 
         .form-control {
@@ -80,6 +84,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 10px;
+
             font-size: 16px;
             transition: height 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             font-family: 'Roboto', sans-serif;
@@ -89,6 +94,7 @@
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
             border-color: #007bff;
         }
+
 
         textarea {
             resize: none;
@@ -105,6 +111,7 @@
             padding: 12px 20px;
             transition: background-color 0.3s ease;
             font-size: 18px;  /* Aumenta el tamaño del texto */
+
         }
 
         button[type="submit"]:hover {
@@ -228,6 +235,7 @@
     {% endif %}
 {% endif %}
 
+
     </div>
 
     <!-- Bootstrap JS -->
@@ -243,6 +251,7 @@
                 mode: "multiple", // Permitir seleccionar varias fechas
                 dateFormat: "Y-m-d", // Formato de fecha (año-mes-día)
                 enable: fechasDisponiblesExistentes,
+
             });
         });
     </script>
