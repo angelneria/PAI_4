@@ -84,6 +84,12 @@
     pointer-events: none;
 }
 
+.flatpickr-day {
+    cursor: not-allowed;
+    color: rgba(57, 57, 57, 0.1);
+
+}
+
 
         /* Para hacer el botón más oscuro cuando está sobre un fondo claro */
         .carousel-control-prev {
@@ -107,6 +113,18 @@
         }
 
 
+            /* Centrar el contenedor del calendario */
+            #contenedor-calendario {
+    display: flex;
+    flex-direction: column; /* Coloca el título y el calendario en columna */
+    align-items: center;    /* Centra los elementos horizontalmente */
+    justify-content: center; /* Centra los elementos verticalmente */
+    margin-top: 15px;
+}
+
+#calendario-disponibilidades {
+    margin-top: 8px; /* Espaciado entre el título y el calendario */
+}
 
 
     </style>
@@ -154,18 +172,20 @@
             </ul>
 
             <!-- Calendario de disponibilidad -->
-            <div>
-                
-                <div id="calendario-disponibilidades">Fechas Disponibles</div>
+            <div id="contenedor-calendario" class="text-center">
+                <h3>Fechas Disponibles</h3>
+                <div id="calendario-disponibilidades"></div>
             </div>
+            
         </div>
     </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const fechasDisponiblesExistentes = "{{ fechas_disponibles }}".split(", ").filter(f => f);
+        console.log("{{ fechas_disponibles }}")
 
+        const fechasDisponiblesExistentes = "{{ fechas_disponibles }}".split(",").map(f => f.trim()); // Elimina espacios en blanco        
         flatpickr("#calendario-disponibilidades", {
             mode: "multiple", // Permitir seleccionar varias fechas
             
@@ -174,11 +194,16 @@
             inline: true, // Mostrar el calendario directamente
             locale: "es", // Idioma español
             disable: [
-                function(date) {
-                    // Deshabilitar las fechas que no están en fechasDisponiblesExistentes
-                    return !fechasDisponiblesExistentes.includes(date.toISOString().split('T')[0]);
-                }
-            ],
+            function (date) {
+                // Convertir la fecha del calendario a "Y-m-d"
+                const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                // Si no está en las fechas disponibles, deshabilitarla
+                return !fechasDisponiblesExistentes.includes(formattedDate);
+            }
+        ],
+
+
+
             onDayCreate: function(dObj, dStr, instance) {
                 // Deshabilitar la interacción con las fechas ya seleccionadas
                 if (fechasDisponiblesExistentes.includes(dStr)) {
