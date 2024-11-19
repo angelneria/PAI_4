@@ -19,4 +19,8 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='usuarios/contraseña/password_reset_complete.html',
             extra_context={'editar_url': reverse_lazy('editar_perfil')}), name='password_reset_complete'), 
     path('logout/', views.logout_view, name='logout'),
+    path('chat/', views.lista_chats, name='lista_chats'),
+    path('chat/', views.chat_view, name='chat'),
+    path('chat/<str:room_name>/messages/', views.get_messages, name='get_messages'),
+    path('chat/<str:room_name>/send/', views.send_message, name='send_message'),
 ]

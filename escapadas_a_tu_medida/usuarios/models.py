@@ -3,6 +3,8 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.timezone import now
+
 
 class PerfilUsuario(models.Model):
     USUARIO_TIPO_CHOICES = [
@@ -22,4 +24,16 @@ class PerfilUsuario(models.Model):
     
     def __str__(self):
         return f"{self.usuario.username} - {self.get_tipo_usuario_display()}"
+    
+class Message(models.Model):
+    room = models.CharField(max_length=255)
+    sender = models.CharField(max_length=255)
+    content = models.TextField()
+    timestamp = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f"{self.sender}: {self.content[:50]}"
+
+    class Meta:
+        ordering = ('timestamp',)
 

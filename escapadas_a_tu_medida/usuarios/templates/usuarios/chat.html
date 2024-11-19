@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Escapadas a tu medida{% endblock %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    {% block navbar_custom_styles %}
+    <style>
+        .navbar {
+            height: 150px;
+            /* Cambiar la altura solo en esta página */
+        }
+    </style>
+    {% endblock %}
+    {% block search_bar %} {% endblock %}
+    {% block content %}
+    <style>
+        /* Contenedor principal */
+        .chat-container {
+            display: flex;
+            height: 80vh; /* Asegúrate de que tenga un tamaño razonable */
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+    
+        /* Panel izquierdo (lista de chats) */
+        .chat-list {
+            width: 30%; /* Siempre ocupa el 30% */
+            border-right: 1px solid #ddd;
+            overflow-y: auto; /* Permite desplazarse si la lista es muy larga */
+            background-color: #f7f7f7;
+        }
+    
+        .chat-item {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    
+        .chat-item:hover {
+            background-color: #e9ecef;
+        }
+    
+        /* Panel derecho (chat activo) */
+        .chat-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+    
+        .chat-header {
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    
+        .chat-log {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto; /* Habilita el desplazamiento si hay demasiados mensajes */
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Espaciado entre mensajes */
+        }
+    
+        .message {
+            display: inline-block;
+            margin: 10px 0;
+            max-width: 70%; /* Mensajes no ocupan más del 70% del ancho del contenedor */
+            padding: 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word; /* Ajusta las palabras largas automáticamente */
+            position: relative;
+        }
+    
+        .message.sent {
+            margin-left: auto;
+            background-color: #dcf8c6; /* Verde claro para mensajes enviados */
+            text-align: right;
+        }
+    
+        .message.received {
+            margin-right: auto;
+            background-color: #ffffff; /* Blanco para mensajes recibidos */
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+    
+        .message p {
+            margin: 0;
+        }
+    
+        .message small {
+            display: block;
+            font-size: 10px;
+            color: gray;
+            margin-top: 5px;
+        }
+    
+        .chat-footer {
+            display: flex;
+            padding: 15px;
+            background-color: #f7f7f7;
+        }
+    
+        .chat-footer input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+    
+        .chat-footer button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    
+        .chat-footer button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="chat-container">
+        <!-- Panel Izquierdo (Lista de Chats) -->
+        <div class="chat-list">
+            {% for chat in chats %}
+            <div class="chat-item" onclick="openChat('{{ chat.room_name }}', '{{ chat.contacto.usuario.username }}')">
+                <div>
+                    <strong>{{ chat.contacto.usuario.username }}</strong>
+                    <p>{{ chat.ultimo_mensaje }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Panel Derecho (Chat Activo) -->
+        <div class="chat-window">
+            <div class="chat-header">
+                <span id="contact-name">Selecciona un chat</span>
+            </div>
+            <div class="chat-log" id="chat-log">
+                <!-- Mensajes cargados dinámicamente -->
+            </div>
+            <div class="chat-footer">
+                <input id="chat-message-input" type="text" placeholder="Escribe un mensaje">
+                <button id="chat-message-send">Enviar</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        let roomName = "";
+
+        function loadMessages() {
+            const currentUser = "{{ request.user.username }}"; // Nombre de usuario actual
+            $.get(`/chat/${roomName}/messages/`, function (data) {
+                const chatLog = $('#chat-log');
+                chatLog.empty();
+                data.messages.forEach(function (message) {
+                    const alignmentClass = message.sender === currentUser ? "sent" : "received";
+                    chatLog.append(`
+                        <div class="message ${alignmentClass}">
+                            <p>${message.content}</p>
+                            <small>${message.timestamp}</small>
+                        </div>
+                    `);
+                });
+                chatLog.scrollTop(chatLog[0].scrollHeight);
+            });
+        }
+
+        function openChat(newRoomName, name) {
+            roomName = newRoomName;
+            $('#contact-name').text(name);
+            loadMessages();
+
+            $('#chat-message-send').off('click').on('click', function () {
+                const message = $('#chat-message-input').val();
+
+                if (!message) {
+                    alert("Se requiere un mensaje.");
+                    return;
+                }
+
+                $.ajax({
+                    url: `/chat/${roomName}/send/`,
+                    type: 'POST',
+                    data: JSON.stringify({ content: message }),
+                    contentType: 'application/json',
+                    success: function () {
+                        $('#chat-message-input').val('');
+                        loadMessages();
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
+{% endblock %}
