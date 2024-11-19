@@ -23,19 +23,22 @@
         /* Contenedor principal */
         .chat-container {
             display: flex;
-            height: 80vh; /* Asegúrate de que tenga un tamaño razonable */
+            height: 80vh;
+            /* Asegúrate de que tenga un tamaño razonable */
             overflow: hidden;
             box-sizing: border-box;
         }
-    
+
         /* Panel izquierdo (lista de chats) */
         .chat-list {
-            width: 30%; /* Siempre ocupa el 30% */
+            width: 30%;
+            /* Siempre ocupa el 30% */
             border-right: 1px solid #ddd;
-            overflow-y: auto; /* Permite desplazarse si la lista es muy larga */
+            overflow-y: auto;
+            /* Permite desplazarse si la lista es muy larga */
             background-color: #f7f7f7;
         }
-    
+
         .chat-item {
             padding: 15px;
             cursor: pointer;
@@ -44,11 +47,11 @@
             gap: 10px;
             border-bottom: 1px solid #ddd;
         }
-    
+
         .chat-item:hover {
             background-color: #e9ecef;
         }
-    
+
         /* Panel derecho (chat activo) */
         .chat-window {
             flex: 1;
@@ -56,7 +59,7 @@
             flex-direction: column;
             overflow: hidden;
         }
-    
+
         .chat-header {
             padding: 15px;
             background-color: #007bff;
@@ -66,58 +69,64 @@
             align-items: center;
             gap: 10px;
         }
-    
+
         .chat-log {
             flex: 1;
             padding: 15px;
-            overflow-y: auto; /* Habilita el desplazamiento si hay demasiados mensajes */
+            overflow-y: auto;
+            /* Habilita el desplazamiento si hay demasiados mensajes */
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Espaciado entre mensajes */
+            gap: 10px;
+            /* Espaciado entre mensajes */
         }
-    
+
         .message {
             display: inline-block;
             margin: 10px 0;
-            max-width: 70%; /* Mensajes no ocupan más del 70% del ancho del contenedor */
+            max-width: 70%;
+            /* Mensajes no ocupan más del 70% del ancho del contenedor */
             padding: 10px;
             border-radius: 15px;
             font-size: 14px;
             line-height: 1.5;
-            word-wrap: break-word; /* Ajusta las palabras largas automáticamente */
+            word-wrap: break-word;
+            /* Ajusta las palabras largas automáticamente */
             position: relative;
         }
-    
+
         .message.sent {
             margin-left: auto;
-            background-color: #dcf8c6; /* Verde claro para mensajes enviados */
+            background-color: #dcf8c6;
+            /* Verde claro para mensajes enviados */
             text-align: right;
         }
-    
+
         .message.received {
             margin-right: auto;
-            background-color: #ffffff; /* Blanco para mensajes recibidos */
+            background-color: #ffffff;
+            /* Blanco para mensajes recibidos */
             text-align: left;
             border: 1px solid #ddd;
         }
-    
+
         .message p {
             margin: 0;
         }
-    
+
         .message small {
             display: block;
             font-size: 10px;
             color: gray;
             margin-top: 5px;
         }
-    
+
         .chat-footer {
             display: flex;
             padding: 15px;
             background-color: #f7f7f7;
         }
-    
+
         .chat-footer input {
             flex: 1;
             padding: 10px;
@@ -125,7 +134,7 @@
             border-radius: 5px;
             margin-right: 10px;
         }
-    
+
         .chat-footer button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -134,12 +143,12 @@
             border-radius: 5px;
             cursor: pointer;
         }
-    
+
         .chat-footer button:hover {
             background-color: #0056b3;
         }
     </style>
-    
+
 </head>
 
 <body>
@@ -150,7 +159,7 @@
             <div class="chat-item" onclick="openChat('{{ chat.room_name }}', '{{ chat.contacto.usuario.username }}')">
                 <div>
                     <strong>{{ chat.contacto.usuario.username }}</strong>
-                    <p>{{ chat.ultimo_mensaje }}</p>
+                    <p class="ultimo_mensaje">{{ chat.ultimo_mensaje|escapejs }}</p>
                 </div>
             </div>
             {% endfor %}
@@ -174,6 +183,26 @@
 
     <script>
         let roomName = "";
+
+        function updateLastMessage(roomName, ultimoMensaje) {
+            // Busca todos los elementos con la clase "chat-item"
+            const chatItems = document.querySelectorAll('.chat-item');
+
+            // Itera sobre cada chat-item
+            chatItems.forEach(chatItem => {
+                const onclickValue = chatItem.getAttribute('onclick');
+
+                // Comprueba si el roomName está contenido en el atributo onclick
+                if (onclickValue && onclickValue.includes(roomName)) {
+                    // Encuentra el párrafo con el mensaje y actualízalo
+                    const messageParagraph = chatItem.querySelector('p.ultimo_mensaje');
+                    if (messageParagraph) {
+                        messageParagraph.textContent = ultimoMensaje; // Actualiza el texto del mensaje
+                    }
+                }
+            });
+        }
+
 
         function loadMessages() {
             const currentUser = "{{ request.user.username }}"; // Nombre de usuario actual
@@ -214,6 +243,7 @@
                     success: function () {
                         $('#chat-message-input').val('');
                         loadMessages();
+                        updateLastMessage(roomName, message);
                     }
                 });
             });
