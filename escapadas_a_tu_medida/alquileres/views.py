@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+import stripe
 from .models import Propiedad, Reserva
 from usuarios.models import PerfilUsuario
 from django.contrib.auth.decorators import login_required
@@ -13,7 +14,7 @@ from datetime import datetime
 from django.db import transaction
 from django.contrib import messages
 from django.utils.timezone import now
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 
 
 
@@ -54,36 +55,94 @@ def home(request):
 @login_required
 def crear_reserva(request, propiedad_id):
     propiedad = Propiedad.objects.get(pk=propiedad_id)
-    fechas_escogidas = request.POST.get("fechas_escogidas", "") 
+    fechas_escogidas = request.POST.get("fechas_escogidas", "")
+    numero_huespedes = request.POST.get("numero_huespedes", "")
     fechas_lista = fechas_escogidas.split(",")
     fechas_lista = [fecha.strip() for fecha in fechas_lista]
-    
+
     if request.method == 'POST':
         reserva_form = ReservaForm(request.POST, propiedad_id=propiedad.id)
-        
+
         if reserva_form.is_valid():
-            reserva = reserva_form.save(commit=False)
-            reserva.inquilino = request.user.perfilusuario  # Asocia la reserva al usuario actual
-            reserva.propiedad = propiedad  # Asocia la propiedad seleccionada
-            reserva.fechas_reserva = fechas_lista
-            reserva.save()  # Guarda la reserva en la base de datos
+            # Almacena los datos de la reserva en la sesión
+            request.session['fechas_reserva'] = fechas_lista
+            request.session['numero_huespedes'] = numero_huespedes
+            
 
-            return redirect('/')  # Redirige al detalle de la reserva creada
+            # Obtén el monto a pagar
+            monto = calcular_monto(fechas_lista, propiedad)
+            request.session['monto'] = monto
+
+            # Paso 1: Redirigir a la vista de pago con el monto
+            return redirect('procesar_pago', propiedad_id=propiedad.id, monto=monto)
     else:
-        reserva_form = ReservaForm(propiedad_id=propiedad.id)  # Pasa el id al formulario
+        reserva_form = ReservaForm(propiedad_id=propiedad.id)
 
-
-    fechas_disponibles = ", ".join([
-            disponibilidad.fecha.strftime("%Y-%m-%d")
-            for disponibilidad in Disponibilidad.objects.filter(propiedad=propiedad)
-        ])
+    fechas_disponibles = ", ".join([disponibilidad.fecha.strftime("%Y-%m-%d")
+                                    for disponibilidad in Disponibilidad.objects.filter(propiedad=propiedad)
+                                   ])
 
     return render(request, 'alquileres/crear_reserva.html', {
         'reserva_form': reserva_form,
         'propiedad': propiedad,
         'fechas_disponibles': fechas_disponibles,
-        'reserva_form': reserva_form
     })
+
+
+
+def calcular_monto(fechas_lista, propiedad):
+    # Aquí puedes calcular el monto en función de las fechas seleccionadas y la propiedad
+    # Este es solo un ejemplo; ajusta según tu lógica
+    monto = len(fechas_lista) * propiedad.precio_por_noche
+    return str(monto)
+
+
+@login_required
+def confirmar_reserva(request, propiedad_id):
+    propiedad = Propiedad.objects.get(pk=propiedad_id)
+
+    # Recupera las fechas de la sesión
+    fechas_lista = request.session.get('fechas_reserva', [])
+    numero_huespedes = request.session.get('numero_huespedes', None)
+    monto = request.session.get('monto', None)
+
+        # Crea el PaymentIntent en Stripe
+    monto = float(monto)  # Convierte el monto a un valor flotante
+    monto = int(monto * 100)
+    
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=monto,  # El monto debe estar en centavos (por ejemplo, $10 sería 1000)
+            currency="eur",  # O la moneda que desees usar
+            metadata={
+                'propiedad_id': propiedad_id,
+                'user_id': request.user.id,
+            },
+        )
+    except stripe.error.StripeError as e:
+        return JsonResponse({'error': str(e)})
+
+
+    # Aquí ya no es necesario el formulario, creamos la reserva directamente
+    reserva = Reserva(
+        inquilino=request.user.perfilusuario,  # Asocia la reserva al usuario actual
+        propiedad=propiedad,  # Asocia la propiedad seleccionada
+        fechas_reserva=fechas_lista,  # Usa las fechas recuperadas de la sesión
+        numero_huespedes = numero_huespedes
+    )
+    reserva.save()  # Guarda la reserva en la base de datos
+
+    return JsonResponse({'clientSecret': payment_intent.client_secret})
+
+
+
+
+
+
+
+
+
+
 
 @login_required
 def historial_reservas(request):
@@ -102,6 +161,12 @@ def historial_reservas(request):
         'reservas': reservas,
         'perfil_usuario': perfil_usuario,
     })
+
+
+@login_required
+def pago_realizado(request):
+    return render(request, 'alquileres/confirmar_reserva.html')
+
 
 
 def buscar_alojamientos(request):
