@@ -234,61 +234,79 @@ def eliminar_propiedad(request, propiedad_id):
         return redirect('/gestionPropiedad/') 
     return redirect('/gestionPropiedad/')  
 
+
 @login_required
 def actualizar_propiedad(request, propiedad_id):
-    propiedad = get_object_or_404(Propiedad, pk=propiedad_id)
-
-    # Verificar que el usuario sea el propietario
-    if propiedad.propietario != request.user.perfilusuario:
-        return redirect('/')  # O redirige a una página de error o acceso denegado
+    propiedad = get_object_or_404(Propiedad, id=propiedad_id, propietario=request.user.perfilusuario)
 
     if request.method == 'POST':
         propiedad_form = PropiedadForm(request.POST, instance=propiedad)
-        imagen_formset = ImagenFormSet(request.POST, request.FILES, instance=propiedad)
+        imagenes = request.FILES.getlist('imagenes')
         fechas_disponibles = request.POST.get("fechas_disponibles", "")
 
-        if propiedad_form.is_valid() and imagen_formset.is_valid():
+        if propiedad_form.is_valid():
             try:
                 with transaction.atomic():
-                    # Actualizar la propiedad
+                    # Guardar la propiedad
                     propiedad = propiedad_form.save(commit=False)
-                    propiedad.propietario = request.user.perfilusuario
                     propiedad.save()
 
-                    # Actualizar imágenes
-                    imagen_formset.instance = propiedad
-                    imagen_formset.save()
-                    if not propiedad.imagenes.exists():
-                        raise ValidationError("Cada propiedad debe tener al menos una imagen asociada.")
+                    # Manejar imágenes
+                    if len(imagenes) > 10:
+                        raise ValidationError("No puedes subir más de 10 imágenes.")
+
+                    # Eliminar imágenes seleccionadas para eliminar
+                    imagenes_a_eliminar = request.POST.getlist('eliminar_imagenes')
+                    Imagen.objects.filter(id__in=imagenes_a_eliminar, propiedad=propiedad).delete()
+
+                    # Guardar nuevas imágenes
+                    for imagen in imagenes:
+                        Imagen.objects.create(propiedad=propiedad, imagen=imagen)
 
                     # Actualizar fechas disponibles
+                    nuevas_fechas = set()
                     if fechas_disponibles:
                         fechas_list = fechas_disponibles.split(",")
-                        # Eliminar fechas anteriores y agregar nuevas
-                        Disponibilidad.objects.filter(propiedad=propiedad).delete()
-                        for fecha in fechas_list:
-                            fecha_obj = datetime.strptime(fecha.strip(), "%Y-%m-%d").date()
-                            Disponibilidad.objects.create(propiedad=propiedad, fecha=fecha_obj)
+                        nuevas_fechas = {
+                            datetime.strptime(fecha.strip(), "%Y-%m-%d").date() for fecha in fechas_list
+                        }
 
-                    # Validar integridad del modelo
+                    # Fechas ya guardadas en la base de datos
+                    fechas_actuales = set(
+                        Disponibilidad.objects.filter(propiedad=propiedad).values_list('fecha', flat=True)
+                    )
+
+                    # Eliminar fechas desmarcadas
+                    fechas_a_eliminar = fechas_actuales - nuevas_fechas
+                    Disponibilidad.objects.filter(propiedad=propiedad, fecha__in=fechas_a_eliminar).delete()
+
+                    # Agregar nuevas fechas
+                    fechas_a_agregar = nuevas_fechas - fechas_actuales
+                    for fecha in fechas_a_agregar:
+                        Disponibilidad.objects.create(propiedad=propiedad, fecha=fecha)
+
+                    # Validar cambios
                     propiedad.full_clean()
 
-                return redirect('/')  # Redirige a la página de detalle de la propiedad
+                return redirect('/')  # Redirige tras guardar los cambios
             except ValidationError as e:
                 propiedad_form.add_error(None, e)
+
     else:
         propiedad_form = PropiedadForm(instance=propiedad)
-        imagen_formset = ImagenFormSet(instance=propiedad)
-        # Obtener las fechas disponibles existentes como una cadena separada por comas
-        fechas_disponibles = ", ".join([
-            disponibilidad.fecha.strftime("%Y-%m-%d")
-            for disponibilidad in Disponibilidad.objects.filter(propiedad=propiedad)
-        ])
+
+    # Obtener TODAS las fechas disponibles para esta propiedad
+    fechas_disponibles = ",".join(
+        [d.fecha.strftime("%Y-%m-%d") for d in Disponibilidad.objects.filter(propiedad=propiedad)]
+    )
+
+    # Obtener imágenes actuales de la propiedad
+    imagenes_actuales = Imagen.objects.filter(propiedad=propiedad)
 
     return render(request, 'alquileres/editar_propiedad.html', {
         'propiedad_form': propiedad_form,
-        'imagen_formset': imagen_formset,
-        'fechas_disponibles': fechas_disponibles,  # Pasar las fechas existentes al template
+        'fechas_disponibles': fechas_disponibles,
+        'imagenes_actuales': imagenes_actuales,  # Pasar imágenes actuales al template
     })
 
 
