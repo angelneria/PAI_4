@@ -37,7 +37,7 @@ class ReservaForm(forms.ModelForm):
     numero_huespedes = forms.IntegerField(initial=1)
     class Meta:
         model = Reserva
-        fields = ['numero_huespedes', 'fechas_reserva']
+        fields = ['numero_huespedes']
 
     def __init__(self, *args, **kwargs):
         self.propiedad_id = kwargs.pop('propiedad_id', None)  # Extrae el id de la propiedad

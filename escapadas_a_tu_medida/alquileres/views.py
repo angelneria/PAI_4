@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 import stripe
 from .models import Propiedad, Reserva
@@ -15,6 +16,8 @@ from django.db import transaction
 from django.contrib import messages
 from django.utils.timezone import now
 from django.http import HttpResponseForbidden, JsonResponse
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
 
 
@@ -98,6 +101,30 @@ def calcular_monto(fechas_lista, propiedad):
     return str(monto)
 
 
+
+
+
+def enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva):
+    asunto = asunto
+    destinatario = destinatario
+    
+    # Renderizar contenido HTML
+    mensaje_html = render_to_string("alquileres/correo_reserva.html", {"usuario": str(nombre_destinatario), "propiedad": propiedad_reservada, "reserva":reserva})
+
+    email = EmailMessage(
+        asunto,
+        mensaje_html,
+        settings.EMAIL_HOST_USER,  # Remitente
+        [destinatario],  # Destinatarios
+    )
+    email.content_subtype = "html"  # Indicar que el mensaje es HTML
+
+    email.send(fail_silently=False)
+
+    
+
+
+
 @login_required
 def confirmar_reserva(request, propiedad_id):
     propiedad = Propiedad.objects.get(pk=propiedad_id)
@@ -132,6 +159,18 @@ def confirmar_reserva(request, propiedad_id):
         numero_huespedes = numero_huespedes
     )
     reserva.save()  # Guarda la reserva en la base de datos
+
+
+
+    asunto = "Confirmación de reserva"
+    destinatario = reserva.inquilino.usuario.email
+    nombre_destinatario = reserva.inquilino.usuario.username
+    propiedad_reservada = reserva.propiedad
+    enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva)
+
+
+
+
 
     return JsonResponse({'clientSecret': payment_intent.client_secret})
 
