@@ -52,30 +52,44 @@ def home(request):
 
 
 
-@login_required
+
 def crear_reserva(request, propiedad_id):
     propiedad = Propiedad.objects.get(pk=propiedad_id)
     fechas_escogidas = request.POST.get("fechas_escogidas", "")
     numero_huespedes = request.POST.get("numero_huespedes", "")
     fechas_lista = fechas_escogidas.split(",")
     fechas_lista = [fecha.strip() for fecha in fechas_lista]
+    user_authenticated = request.user.is_authenticated
 
 
     if request.method == 'POST':
-        reserva_form = ReservaForm(request.POST, propiedad_id=propiedad.id)
+        reserva_form = ReservaForm(request.POST, propiedad_id=propiedad.id, user_authenticated=user_authenticated)
 
         if reserva_form.is_valid():
-            # Almacena los datos de la reserva en la sesión
+            # Datos para usuarios no registrados
+            nombre_cliente = reserva_form.cleaned_data.get('nombre_usuario_anonimo')
+            email_cliente = reserva_form.cleaned_data.get('correo_usuario_anonimo')
+            telefono_cliente = reserva_form.cleaned_data.get('telefono_usuario_anonimo')
+
+            # Datos para la reserva
+            numero_huespedes = reserva_form.cleaned_data.get('numero_huespedes')
+            fechas_lista = request.POST.get("fechas_escogidas", "").split(",")
+            fechas_lista = [fecha.strip() for fecha in fechas_lista]
+
+            # Cálculo del monto
+            monto = calcular_monto(fechas_lista, propiedad)
+
+            # Almacena los datos en la sesión
             request.session['fechas_reserva'] = fechas_lista
             request.session['numero_huespedes'] = numero_huespedes
-            
-
-            # Obtén el monto a pagar
-            monto = calcular_monto(fechas_lista, propiedad)
+            request.session['nombre_cliente'] = nombre_cliente
+            request.session['email_cliente'] = email_cliente
+            request.session['telefono_cliente'] = telefono_cliente
             request.session['monto'] = monto
 
-            # Paso 1: Redirigir a la vista de pago con el monto
+            # Redirigir a procesar pago
             return redirect('procesar_pago', propiedad_id=propiedad.id, monto=monto)
+
     else:
         reserva_form = ReservaForm(propiedad_id=propiedad.id)
 
@@ -87,6 +101,7 @@ def crear_reserva(request, propiedad_id):
         'reserva_form': reserva_form,
         'propiedad': propiedad,
         'fechas_disponibles': fechas_disponibles,
+        'user_authenticated': request.user.is_authenticated ,
     })
 
 
@@ -98,13 +113,16 @@ def calcular_monto(fechas_lista, propiedad):
     return str(monto)
 
 
-@login_required
+
 def confirmar_reserva(request, propiedad_id):
     propiedad = Propiedad.objects.get(pk=propiedad_id)
 
     # Recupera las fechas de la sesión
     fechas_lista = request.session.get('fechas_reserva', [])
     numero_huespedes = request.session.get('numero_huespedes', None)
+    nombre_cliente = request.session.get('nombre_cliente', None)
+    email_cliente = request.session.get('email_cliente', None)
+    telefono_cliente = request.session.get('telefono_cliente', None)
     monto = request.session.get('monto', None)
 
         # Crea el PaymentIntent en Stripe
@@ -123,13 +141,22 @@ def confirmar_reserva(request, propiedad_id):
     except stripe.error.StripeError as e:
         return JsonResponse({'error': str(e)})
 
+    if request.user.is_authenticated:
+        # Si el usuario está autenticado, usamos su perfil
+        inquilino = request.user.perfilusuario
+    else:
+        # Si el usuario no está autenticado, usamos "Anonymous" o los datos del formulario
+        inquilino = None  # Puede ser None o una referencia a un "perfil anónimo"
 
     # Aquí ya no es necesario el formulario, creamos la reserva directamente
     reserva = Reserva(
-        inquilino=request.user.perfilusuario,  # Asocia la reserva al usuario actual
+        inquilino=inquilino,  # Asocia la reserva al usuario actual
         propiedad=propiedad,  # Asocia la propiedad seleccionada
         fechas_reserva=fechas_lista,  # Usa las fechas recuperadas de la sesión
-        numero_huespedes = numero_huespedes
+        numero_huespedes = numero_huespedes,
+        nombre_usuario_anonimo = nombre_cliente,
+        correo_usuario_anonimo = email_cliente,
+        telefono_usuario_anonimo = telefono_cliente,
     )
     reserva.save()  # Guarda la reserva en la base de datos
 
@@ -164,7 +191,7 @@ def historial_reservas(request):
     })
 
 
-@login_required
+
 def pago_realizado(request):
     return render(request, 'alquileres/confirmar_reserva.html')
 

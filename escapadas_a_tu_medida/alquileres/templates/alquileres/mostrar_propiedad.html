@@ -187,12 +187,22 @@
                     <span class="visually-hidden">Siguiente</span>
                 </button>
             </div>
+            {% if perfil_usuario.tipo_usuario != 'anfitrion' %}
+            <div class="btn-container mt-3"> <!-- Se añadió mt-5 para mayor separación -->
+                <form action="{% url 'crear_reserva' resultado.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning btn-lg btn-agregar-deseos w-100"> <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
+                        <i class="fas fa-calendar-alt me-2"></i> Pasar a reserva
+                    </button>
+                </form>
+            </div>
+            {% endif %}
             {% if perfil_usuario.tipo_usuario == 'inquilino' %}
             {% if not ya_en_lista_deseos %}
             <div class="btn-container mt-5"> <!-- Se añadió mt-5 para mayor separación -->
                 <form action="{% url 'agregar_lista_deseos' resultado.id %}" method="POST">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-lg btn-agregar-deseos w-100"> <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
+                    <button type="submit" class="btn btn-success btn-lg btn-agregar-deseos w-100 mb-5"> <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
                         <i class="fas fa-check-circle me-2"></i> Añadir a la lista de deseos
                     </button>
                 </form>
