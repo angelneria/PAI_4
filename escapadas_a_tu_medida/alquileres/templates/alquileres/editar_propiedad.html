@@ -246,11 +246,7 @@
             const previewContainer = document.getElementById('preview-container');
             previewContainer.innerHTML = '';
             const files = event.target.files;
-            if (files.length > 10) {
-                alert('No puedes subir más de 10 imágenes.');
-                event.target.value = '';
-                return;
-            }
+
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function (e) {

@@ -20,8 +20,8 @@ def procesar_pago(request, propiedad_id, monto):
         # Crear el PaymentIntent
         try:
             intent = stripe.PaymentIntent.create(
-                amount=int(float(monto) * 100),  # Convertir a centavos
-                currency='usd',
+                amount=int(float(monto) * 100),  
+                currency='eur',
                 payment_method_types=['card'],
             )
             return JsonResponse({'clientSecret': intent['client_secret']})

@@ -18,6 +18,7 @@ from django.utils.timezone import now
 from django.http import HttpResponseForbidden, JsonResponse
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 
 
@@ -137,12 +138,14 @@ def calcular_monto(fechas_lista, propiedad):
     return str(monto)
 
 
-def enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva):
+def enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva, request):
     asunto = asunto
     destinatario = destinatario
-    
+    url_seguimiento = request.build_absolute_uri(
+        reverse("seguir_reservas", kwargs={"reserva_id": reserva.id})
+    )
     # Renderizar contenido HTML
-    mensaje_html = render_to_string("alquileres/correo_reserva.html", {"usuario": str(nombre_destinatario), "propiedad": propiedad_reservada, "reserva":reserva})
+    mensaje_html = render_to_string("alquileres/correo_reserva.html", {"usuario": str(nombre_destinatario), "propiedad": propiedad_reservada, "reserva":reserva, "url_seguimiento": url_seguimiento})
 
     email = EmailMessage(
         asunto,
@@ -158,7 +161,7 @@ def enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada
 
 
 
-@login_required
+
 def confirmar_reserva(request, propiedad_id):
     propiedad = Propiedad.objects.get(pk=propiedad_id)
 
@@ -189,9 +192,13 @@ def confirmar_reserva(request, propiedad_id):
     if request.user.is_authenticated:
         # Si el usuario está autenticado, usamos su perfil
         inquilino = request.user.perfilusuario
+        destinatario = inquilino.usuario.email
+        nombre_destinatario = inquilino.usuario.username
     else:
         # Si el usuario no está autenticado, usamos "Anonymous" o los datos del formulario
-        inquilino = None  # Puede ser None o una referencia a un "perfil anónimo"
+        inquilino = None    # Puede ser None o una referencia a un "perfil anónimo"
+        destinatario = email_cliente
+        nombre_destinatario = nombre_cliente  
 
     # Aquí ya no es necesario el formulario, creamos la reserva directamente
     reserva = Reserva(
@@ -208,14 +215,8 @@ def confirmar_reserva(request, propiedad_id):
 
 
     asunto = "Confirmación de reserva"
-    destinatario = reserva.inquilino.usuario.email
-    nombre_destinatario = reserva.inquilino.usuario.username
     propiedad_reservada = reserva.propiedad
-    enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva)
-
-
-
-
+    enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva, request)
 
     return JsonResponse({'clientSecret': payment_intent.client_secret})
 
@@ -318,10 +319,11 @@ def buscar_alojamientos(request):
 def crear_propiedad(request):
     if request.method == 'POST':
         propiedad_form = PropiedadForm(request.POST)
-        # imagen_formset = ImagenFormSet(request.POST, request.FILES)  # Importante pasar request.FILES
         fechas_disponibles = request.POST.get("fechas_disponibles", "")  # Obtener las fechas del formulario
-
         imagenes = request.FILES.getlist('imagenes')  # Obtener múltiples imágenes del campo de entrada
+
+        # Inicializar el formset vacío por si falla la validación del formulario principal
+        imagen_formset = ImagenFormSet(request.POST, request.FILES)
 
         if propiedad_form.is_valid():
             try:
@@ -351,6 +353,9 @@ def crear_propiedad(request):
                 return redirect('/')  # Redirige al detalle de la propiedad creada
             except ValidationError as e:
                 propiedad_form.add_error(None, e)
+        else:
+            # Aquí manejamos el caso en que el formulario no es válido
+            imagen_formset = ImagenFormSet()  # Reasignar por coherencia en el flujo
 
     else:
         propiedad_form = PropiedadForm()
@@ -360,6 +365,7 @@ def crear_propiedad(request):
         'propiedad_form': propiedad_form,
         'imagen_formset': imagen_formset,
     })
+
 
 @login_required
 def listar_propiedades_propietario(request):
@@ -546,3 +552,11 @@ def eliminar_de_lista_deseos(request, propiedad_id):
     # Redirige de nuevo a la página de la lista de deseos
     return redirect('/listaDeseos')  # Asegúrate de que esta vista esté bien configurada
 
+def seguir_reservas(request, reserva_id):
+    # Obtener la reserva específica por su ID
+    reserva = get_object_or_404(Reserva, id=reserva_id)
+
+    # Pasar los detalles de la reserva al template
+    return render(request, 'alquileres/seguimiento_reserva.html', {
+        'reserva': reserva,
+    })
