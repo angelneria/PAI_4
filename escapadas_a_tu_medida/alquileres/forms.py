@@ -37,6 +37,7 @@ class ReservaForm(forms.ModelForm):
     numero_huespedes = forms.IntegerField(initial=1)
     class Meta:
         model = Reserva
+
         fields = ['numero_huespedes', 'nombre_usuario_anonimo', 'correo_usuario_anonimo', 'telefono_usuario_anonimo']
 
 

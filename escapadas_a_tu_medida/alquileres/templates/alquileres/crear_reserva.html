@@ -272,8 +272,8 @@
 
                 <div class="form-group">
                     <h3 class="custom-h3">Seleccionar Fechas:</h3>
-                    <input type="text" id="fechas_escogidas" name="fechas_escogidas" placeholder="Selecciona las fechas"
-                        class="form-control" />
+                    <input type="text" id="fechas_escogidas" name="fechas_escogidas" placeholder="Selecciona las fechas" class="form-control" required  />
+
 
                 </div>
 
@@ -314,9 +314,21 @@
                 mode: "multiple", // Permitir seleccionar varias fechas
                 dateFormat: "Y-m-d", // Formato de fecha (año-mes-día)
                 enable: fechasDisponiblesExistentes,
+                
 
             });
         });
+
+
+        document.querySelector("form").addEventListener("submit", function(event) {
+            const fechas = document.getElementById("fechas_escogidas").value.trim();
+
+            if (!fechas) {
+                event.preventDefault(); // Detiene el envío del formulario
+                alert("Por favor selecciona al menos una fecha.");
+            }
+        });
+
     </script>
 </body>
 
