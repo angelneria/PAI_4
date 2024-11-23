@@ -39,6 +39,7 @@ class ReservaForm(forms.ModelForm):
         model = Reserva
         fields = ['numero_huespedes', 'nombre_usuario_anonimo', 'correo_usuario_anonimo', 'telefono_usuario_anonimo']
 
+
     def __init__(self, *args, **kwargs):
         self.propiedad_id = kwargs.pop('propiedad_id', None)  # Extrae el id de la propiedad
         self.user_authenticated = kwargs.pop('user_authenticated', False)
@@ -68,6 +69,8 @@ class ReservaForm(forms.ModelForm):
             raise forms.ValidationError("El número de huéspedes no puede ser mayor al permitido.")
 
         return n_huespedes
+    
+
 
 
         
