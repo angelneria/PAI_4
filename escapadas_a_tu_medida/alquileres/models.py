@@ -72,17 +72,24 @@ class Imagen(models.Model):
 
 class Reserva(models.Model):
     propiedad = models.ForeignKey(Propiedad, on_delete=models.CASCADE)
-    inquilino = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE, limit_choices_to={'tipo_usuario': 'inquilino'})
+    inquilino = models.ForeignKey(
+        PerfilUsuario, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        limit_choices_to={'tipo_usuario': 'inquilino'}
+    )
+    nombre_usuario_anonimo = models.CharField(max_length=255, null=True, blank=True)
+    correo_usuario_anonimo = models.EmailField(null=True, blank=True)
+    telefono_usuario_anonimo = models.CharField(max_length=20, null=True, blank=True)
     numero_huespedes = models.IntegerField()
     fechas_reserva = models.JSONField(default=list)  # Almacena las fechas reservadas como una lista
     total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Validar que se seleccionaron fechas
         if not self.fechas_reserva:
             raise ValidationError("Debe seleccionar al menos una fecha para la reserva.")
 
-        # Verificar que las fechas están disponibles para la propiedad
         fechas_seleccionadas = set(self.fechas_reserva)
         disponibilidades = Disponibilidad.objects.filter(
             propiedad=self.propiedad,
@@ -92,10 +99,8 @@ class Reserva(models.Model):
         if disponibilidades.count() != len(fechas_seleccionadas):
             raise ValidationError("Una o más fechas seleccionadas no están disponibles.")
 
-        # Eliminar las fechas de la tabla de Disponibilidad
         disponibilidades.delete()
 
-        # Calcular el total si no está definido
         if not self.total:
             self.total = len(fechas_seleccionadas) * self.propiedad.precio_por_noche
 
@@ -103,7 +108,10 @@ class Reserva(models.Model):
 
     def __str__(self):
         fechas = ", ".join(self.fechas_reserva)
-        return f"Reserva de {self.inquilino} para {self.propiedad} en las fechas: {fechas}"
+        if self.inquilino:
+            return f"Reserva de {self.inquilino} para {self.propiedad} en las fechas: {fechas}"
+        return f"Reserva de {self.nombre_usuario_anonimo} ({self.correo_usuario_anonimo}) para {self.propiedad} en las fechas: {fechas}"
+
 
 
 class PropiedadesDeseadas(models.Model):
