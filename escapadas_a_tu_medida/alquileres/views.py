@@ -66,6 +66,7 @@ def crear_reserva(request, propiedad_id):
 
     if request.method == 'POST':
         reserva_form = ReservaForm(request.POST, propiedad_id=propiedad.id)
+        
 
         if reserva_form.is_valid():
             # Almacena los datos de la reserva en la sesión
