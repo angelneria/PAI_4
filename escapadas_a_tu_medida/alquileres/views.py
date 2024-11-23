@@ -60,6 +60,7 @@ def crear_reserva(request, propiedad_id):
     fechas_lista = fechas_escogidas.split(",")
     fechas_lista = [fecha.strip() for fecha in fechas_lista]
 
+
     if request.method == 'POST':
         reserva_form = ReservaForm(request.POST, propiedad_id=propiedad.id)
 

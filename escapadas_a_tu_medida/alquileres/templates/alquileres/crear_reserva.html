@@ -213,6 +213,17 @@
                 <div class="form-group">
                     <h3 class="custom-h3">Seleccionar Fechas:</h3>
                     <input type="text" id="fechas_escogidas" name="fechas_escogidas" placeholder="Selecciona las fechas" class="form-control" />
+
+                    {% if reserva_form.fechas_reserva.errors %}
+                        <div class="text-danger">
+                            <!-- Mostrar cada error debajo del campo -->
+                            {% for error in reserva_form.fechas_reserva.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+
                 </div>
 
                 <button type="submit" class="btn btn-primary">Crear Reserva</button>
