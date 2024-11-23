@@ -65,18 +65,31 @@ class FormularioInicioSesion(AuthenticationForm):
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
 
 
-class FormularioEdicionPerfil(forms.ModelForm):
+class FormularioEdicionUsuario(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'email']  # Solo estos campos serán editables
+        fields = ['username', 'email', 'first_name', 'last_name']  # Campos editables
         widgets = {
             'email': forms.EmailInput(attrs={'id': 'id_email'}),
         }
         labels = {
             'username': 'Nombre de usuario',
             'email': 'Correo',
+            'first_name': 'Nombre',
+            'last_name': 'Apellidos',
         }
         help_texts = {
-            'username': None,  # Quita el texto de ayuda del campo username
+            'username': None,
         }
 
+
+class FormularioEdicionPerfilUsuario(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ['telefono']  # Campos editables del perfil
+        labels = {
+            'telefono': 'Teléfono',
+        }
+        widgets = {
+            'telefono': forms.TextInput(attrs={'placeholder': 'Ingrese su número de teléfono'}),
+        }

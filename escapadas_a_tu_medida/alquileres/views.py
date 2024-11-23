@@ -29,9 +29,26 @@ def home(request):
     
     form = FiltroAlojamientosHomeForm(request.GET)  # Formulario para filtros detallados
     if form.is_valid():
+        ubicacion = form.cleaned_data.get('ubicacion')
         precio_min = form.cleaned_data.get('precio_min')
         precio_max = form.cleaned_data.get('precio_max')
+        num_maximo_huespedes = form.cleaned_data.get('num_maximo_huespedes')
+        num_maximo_habitaciones = form.cleaned_data.get('num_maximo_habitaciones')
+
+
+        # Filtro por ubicación
+        if ubicacion:
+            propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
         
+        # Filtro por num_maximo_huespedes
+        if num_maximo_huespedes is not None:
+            propiedades = propiedades.filter(num_maximo_huespedes__gte=num_maximo_huespedes)
+            propiedades = propiedades.order_by('num_maximo_huespedes')
+        
+        # Filtro por num_maximo_habitaciones
+        if num_maximo_habitaciones is not None:
+            propiedades = propiedades.filter(num_maximo_habitaciones=num_maximo_habitaciones)
+
         # Filtro por precio mínimo
         if precio_min is not None:
             propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
@@ -39,6 +56,8 @@ def home(request):
         # Filtro por precio máximo
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
+
+
     propiedades_con_disponibilidad = []
     for propiedad in propiedades:
         # Obtener las fechas disponibles de hoy en adelante
@@ -136,15 +155,6 @@ def confirmar_reserva(request, propiedad_id):
     return JsonResponse({'clientSecret': payment_intent.client_secret})
 
 
-
-
-
-
-
-
-
-
-
 @login_required
 def historial_reservas(request):
     perfil_usuario = request.user.perfilusuario
@@ -177,7 +187,6 @@ def buscar_alojamientos(request):
 
     today= now().date()
 
-
     if request.user.is_authenticated:
         perfil_usuario = request.user.perfilusuario  # Solo lo obtenemos si el usuario está autenticado
 
@@ -194,9 +203,27 @@ def buscar_alojamientos(request):
 
     # Aplicar filtros del formulario si es válido
     if form.is_valid():
+        # Obtener los valores de los campos del formulario
+        ubicacion = form.cleaned_data.get('ubicacion')
         precio_min = form.cleaned_data.get('precio_min')
         precio_max = form.cleaned_data.get('precio_max')
+        num_maximo_huespedes = form.cleaned_data.get('num_maximo_huespedes')
+        num_maximo_habitaciones = form.cleaned_data.get('num_maximo_habitaciones')
+
+
+        # Filtro por ubicación
+        if ubicacion:
+            propiedades = propiedades.filter(ubicacion__icontains=ubicacion)
         
+        # Filtro por num_maximo_huespedes
+        if num_maximo_huespedes is not None:
+            propiedades = propiedades.filter(num_maximo_huespedes__gte=num_maximo_huespedes)
+            propiedades = propiedades.order_by('-num_maximo_huespedes')
+        
+        # Filtro por num_maximo_habitaciones
+        if num_maximo_habitaciones is not None:
+            propiedades = propiedades.filter(num_maximo_habitaciones=num_maximo_habitaciones)
+
         # Filtro por precio mínimo
         if precio_min is not None:
             propiedades = propiedades.filter(precio_por_noche__gte=precio_min)
@@ -204,9 +231,6 @@ def buscar_alojamientos(request):
         # Filtro por precio máximo
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
-
-
-
 
     propiedades_con_disponibilidad = []
     for propiedad in propiedades:
@@ -217,7 +241,6 @@ def buscar_alojamientos(request):
             'dias_disponibles': disponibilidad.count()  # Contar los días
         })
         
-
     # Renderizar la plantilla con los resultados de la búsqueda y el formulario de filtros
     return render(request, 'buscar.html', {
         'perfil_usuario': perfil_usuario,
@@ -225,9 +248,6 @@ def buscar_alojamientos(request):
         'resultados': propiedades_con_disponibilidad,
         'query': query,
     })
-
-
-
 
 @login_required
 def crear_propiedad(request):

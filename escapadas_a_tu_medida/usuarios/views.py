@@ -4,9 +4,8 @@ import json
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
-from .forms import FormularioEdicionPerfil, FormularioRegistroUsuario, FormularioInicioSesion
+from .forms import FormularioEdicionPerfilUsuario, FormularioEdicionUsuario, FormularioRegistroUsuario, FormularioInicioSesion
 from .models import PerfilUsuario, User
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -74,23 +73,26 @@ def iniciar_sesion(request):
 @login_required
 def editar_perfil(request):
     user = request.user  # Usuario actual
+    perfil = user.perfilusuario  # Relación OneToOne entre User y PerfilUsuario
+
     if request.method == "POST":
-        form = FormularioEdicionPerfil(request.POST, instance=user)
-        if form.is_valid():
-            form.save()  # Guardamos solo username y email
+        form_user = FormularioEdicionUsuario(request.POST, instance=user)
+        form_perfil = FormularioEdicionPerfilUsuario(request.POST, instance=perfil)
+
+        if form_user.is_valid() and form_perfil.is_valid():
+            form_user.save()
+            form_perfil.save()
             messages.success(request, "Perfil actualizado exitosamente.")
-            return redirect('/')  # Cambia al nombre de la vista a la que quieras redirigir
+            return redirect('/')  # Redirigir a la página deseada
         else:
             messages.error(request, "Hubo un error al actualizar el perfil.")
     else:
-        form = FormularioEdicionPerfil(instance=user)
-
-    # Generamos la URL para el restablecimiento de contraseña
-    cambio_contrasena_url = reverse('password_reset') + f"?email={user.email}"  # Nombre de la vista para cambiar contraseña
+        form_user = FormularioEdicionUsuario(instance=user)
+        form_perfil = FormularioEdicionPerfilUsuario(instance=perfil)
 
     return render(request, "usuarios/perfil.html", {
-        "form": form,
-        "cambio_contrasena_url": cambio_contrasena_url,
+        "form_user": form_user,
+        "form_perfil": form_perfil,
     })
 
 

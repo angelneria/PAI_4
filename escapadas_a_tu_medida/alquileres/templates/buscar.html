@@ -22,8 +22,8 @@
                 <div class="card">
                     <!-- Imagen de la propiedad arriba -->
                     {% if resultado.propiedad.imagenes.first.imagen.url %}
-                    <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ resultado.propiedad.titulo }}"
-                        style="height: 300px; object-fit: cover;">
+                    <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top"
+                        alt="{{ resultado.propiedad.titulo }}" style="height: 300px; object-fit: cover;">
                     {% endif %}
 
                     <div class="card-body">
@@ -47,7 +47,7 @@
         </div>
         {% endfor %}
     </div>
-                    
+
     {% else %}
     <p class="text-danger">No se encontraron resultados.</p>
     {% endif %}
@@ -69,6 +69,11 @@
                     <form method="GET" action="{% url 'buscar_alojamientos' %}" class="dropdown-menu p-4"
                         aria-labelledby="filterDropdown" style="width: 100%;">
                         <div class="mb-3">
+                            <label for="ubicacion" class="form-label">Ubicación:</label>
+                            <input type="text" id="ubicacion" name="ubicacion" step="0.01" min="0"
+                                class="form-control">
+                        </div>
+                        <div class="mb-3">
                             <label for="precio_min" class="form-label">Precio mínimo:</label>
                             <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
                                 class="form-control">
@@ -78,7 +83,17 @@
                             <label for="precio_max" class="form-label">Precio máximo:</label>
                             <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
                                 class="form-control">
-            
+
+                        </div>
+                        <div class="mb-3">
+                            <label for="num_maximo_huespedes" class="form-label">Número de huéspedes:</label>
+                            <input type="number" id="num_maximo_huespedes" name="num_maximo_huespedes" step="1" min="0"
+                                class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="num_maximo_habitaciones" class="form-label">Número de habitaciones:</label>
+                            <input type="number" id="num_maximo_habitaciones" name="num_maximo_habitaciones" step="1" min="0"
+                                class="form-control">
                         </div>
                         <input type="hidden" name="query" value="{{ query }}">
                         <!-- Botón "Aplicar Filtros" para enviar el formulario -->
