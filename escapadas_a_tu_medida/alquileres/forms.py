@@ -37,11 +37,24 @@ class ReservaForm(forms.ModelForm):
     numero_huespedes = forms.IntegerField(initial=1)
     class Meta:
         model = Reserva
-        fields = ['numero_huespedes']
+
+        fields = ['numero_huespedes', 'nombre_usuario_anonimo', 'correo_usuario_anonimo', 'telefono_usuario_anonimo']
+
 
     def __init__(self, *args, **kwargs):
         self.propiedad_id = kwargs.pop('propiedad_id', None)  # Extrae el id de la propiedad
+        self.user_authenticated = kwargs.pop('user_authenticated', False)
         super().__init__(*args, **kwargs)
+
+        if not self.user_authenticated:
+            self.fields['nombre_usuario_anonimo'].required = True
+            self.fields['correo_usuario_anonimo'].required = True
+            self.fields['telefono_usuario_anonimo'].required = True
+        else:
+            # Si el usuario está autenticado, no hacer estos campos obligatorios
+            self.fields['nombre_usuario_anonimo'].required = False
+            self.fields['correo_usuario_anonimo'].required = False
+            self.fields['telefono_usuario_anonimo'].required = False
 
     def clean_numero_huespedes(self):
         n_huespedes = self.cleaned_data.get('numero_huespedes',0)

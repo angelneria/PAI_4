@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import login_required
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@login_required
 def procesar_pago(request, propiedad_id, monto):
 
     

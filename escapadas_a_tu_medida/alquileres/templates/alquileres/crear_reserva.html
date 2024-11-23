@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,18 +17,23 @@
 
     <style>
         /* Establece la altura de la página completa */
-        body, html {
-            height: 100%;  /* Asegura que el body y html ocupen el 100% de la altura */
-            margin: 0;     /* Elimina los márgenes predeterminados */
+        body,
+        html {
+            height: 100%;
+            /* Asegura que el body y html ocupen el 100% de la altura */
+            margin: 0;
+            /* Elimina los márgenes predeterminados */
         }
 
         /* Centrar el contenido de la página */
         .container-fluid {
-            height: 100vh;  /* Hace que el contenedor ocupe toda la altura de la ventana */
+            height: 100vh;
+            /* Hace que el contenedor ocupe toda la altura de la ventana */
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 0 20px; /* Espaciado lateral */
+            padding: 0 20px;
+            /* Espaciado lateral */
 
         }
 
@@ -37,7 +43,8 @@
             border-radius: 8px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 1000px; /* Aumenta el ancho máximo */
+            max-width: 1000px;
+            /* Aumenta el ancho máximo */
             position: relative;
             display: flex;
             flex-direction: column;
@@ -45,7 +52,8 @@
 
         }
 
-        h2, h3 {
+        h2,
+        h3 {
             font-weight: 700;
             color: #333;
             text-align: center;
@@ -53,7 +61,8 @@
         }
 
         h2 {
-            margin-top: 0; /* Elimina margen superior del título */
+            margin-top: 0;
+            /* Elimina margen superior del título */
 
         }
 
@@ -66,13 +75,17 @@
             font-size: 16px;
             font-weight: 600;
             color: #333;
-            display: block;  /* Cambia a block para que el texto esté encima del campo */
-            margin-bottom: 8px; /* Espaciado entre la etiqueta y el campo */
-            text-align: left;  /* Alinea a la izquierda */
+            display: block;
+            /* Cambia a block para que el texto esté encima del campo */
+            margin-bottom: 8px;
+            /* Espaciado entre la etiqueta y el campo */
+            text-align: left;
+            /* Alinea a la izquierda */
         }
 
         .form-group {
-            margin-bottom: 25px;  /* Aumenta el margen entre los campos */
+            margin-bottom: 25px;
+            /* Aumenta el margen entre los campos */
             display: flex;
             flex-direction: column;
 
@@ -80,7 +93,8 @@
 
         .form-control {
             width: 100%;
-            height: 45px;  /* Aumenta la altura de los campos de entrada */
+            height: 45px;
+            /* Aumenta la altura de los campos de entrada */
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 10px;
@@ -110,16 +124,20 @@
             border-radius: 5px;
             padding: 12px 20px;
             transition: background-color 0.3s ease;
-            font-size: 18px;  /* Aumenta el tamaño del texto */
+            font-size: 18px;
+            /* Aumenta el tamaño del texto */
 
         }
 
         button[type="submit"]:hover {
             background-color: #2a3f5b;
-            color: #fff; /* Azul más oscuro al pasar el mouse */
+            color: #fff;
+            /* Azul más oscuro al pasar el mouse */
         }
 
-        input:focus, textarea:focus, select:focus {
+        input:focus,
+        textarea:focus,
+        select:focus {
             outline: none;
             border-color: #304a6e;
             box-shadow: 0 0 4px rgba(48, 74, 110, 0.4);
@@ -144,7 +162,8 @@
             color: black;
         }
 
-        .form-group input, .form-group textarea {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             height: 45px;
         }
@@ -155,7 +174,8 @@
         }
 
         /* Asegura que el formulario sea responsive */
-        .form-group input, .form-group textarea {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
         }
 
@@ -168,19 +188,19 @@
         }
 
         .custom-h3 {
-    font-size: 16px; /* Cambia el tamaño de la fuente */
-    font-weight: 600; /* Modifica el peso de la fuente */
-    margin-bottom: 10px; /* Ajusta el espacio debajo del h3 */
-    text-align: left;
+            font-size: 16px;
+            /* Cambia el tamaño de la fuente */
+            font-weight: 600;
+            /* Modifica el peso de la fuente */
+            margin-bottom: 10px;
+            /* Ajusta el espacio debajo del h3 */
+            text-align: left;
 
-}
-
-
-
-
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="crear-reserva-container">
@@ -192,27 +212,68 @@
             <h2 class="mb-4">Crear Nueva Reserva</h2>
             <form method="POST">
                 {% csrf_token %}
-                
+
                 <!-- Detalles de la Propiedad -->
-                
+
+                {% if not user_authenticated %}
+                <div class="form-group">
+                    <label for="id_nombre">Nombre:</label>
+                    {{ reserva_form.nombre_usuario_anonimo }}
+                    {% if reserva_form.nombre_usuario_anonimo.errors %}
+                    <div class="text-danger">
+                        {% for error in reserva_form.nombre_usuario_anonimo.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_correo">Correo electrónico:</label>
+                    {{ reserva_form.correo_usuario_anonimo }}
+                    {% if reserva_form.correo_usuario_anonimo.errors %}
+                    <div class="text-danger">
+                        {% for error in reserva_form.correo_usuario_anonimo.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_numero_huespedes">Número de teléfono:</label>
+                    {{ reserva_form.telefono_usuario_anonimo }}
+                    {% if reserva_form.telefono_usuario_anonimo.errors %}
+                    <div class="text-danger">
+                        {% for error in reserva_form.telefono_usuario_anonimo.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+
+
                 <div class="form-group">
                     <label for="{{ reserva_form.numero_huespedes.id_for_label }}">Número de huéspedes:</label>
-                    {{ reserva_form.numero_huespedes }}  <!-- Muestra el campo -->
-                    
+                    {{ reserva_form.numero_huespedes }} <!-- Muestra el campo -->
+
                     <!-- Muestra los errores solo si el campo tiene errores -->
                     {% if reserva_form.numero_huespedes.errors %}
-                        <div class="text-danger">
-                            <!-- Mostrar cada error debajo del campo -->
-                            {% for error in reserva_form.numero_huespedes.errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        </div>
+                    <div class="text-danger">
+                        <!-- Mostrar cada error debajo del campo -->
+                        {% for error in reserva_form.numero_huespedes.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
                     <h3 class="custom-h3">Seleccionar Fechas:</h3>
                     <input type="text" id="fechas_escogidas" name="fechas_escogidas" placeholder="Selecciona las fechas" class="form-control" required  />
+
 
                 </div>
 
@@ -224,18 +285,18 @@
         </div>
 
         {% if request.method == "POST" %}
-    {% if form.errors %}
+        {% if form.errors %}
         <div class="alert alert-danger">
             <ul>
                 {% for field in form %}
-                    {% if field.errors %}
-                        <li>{{ field.label }}: {{ field.errors }}</li>
-                        {% endif %}
-                    {% endfor %}
+                {% if field.errors %}
+                <li>{{ field.label }}: {{ field.errors }}</li>
+                {% endif %}
+                {% endfor %}
             </ul>
         </div>
-    {% endif %}
-{% endif %}
+        {% endif %}
+        {% endif %}
 
 
     </div>
@@ -246,7 +307,7 @@
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const fechasDisponiblesExistentes = "{{ fechas_disponibles }}".split(",").map(f => f.trim()); // Elimina espacios en blanco        
 
             flatpickr("#fechas_escogidas", {
@@ -270,4 +331,5 @@
 
     </script>
 </body>
+
 </html>
