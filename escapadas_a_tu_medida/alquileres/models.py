@@ -10,6 +10,40 @@ from django.utils.timezone import now
 from django.db import models
 
 class Propiedad(models.Model):
+
+    TIPO_PROPIEDAD_CHOICES = [
+        ('apartamento', 'Apartamento'),
+        ('casa', 'Casa'),
+        ('habitacion', 'Habitación'),
+        ('villa', 'Villa'),
+        ('estudio', 'Estudio'),
+        ('loft', 'Loft'),
+        ('bungalow', 'Bungalow'),
+        ('cabaña', 'Cabaña'),
+        ('castillo', 'Castillo'),
+        ('caravana', 'Caravana'),
+        ('barco', 'Barco'),
+        ('iglú', 'Iglú'),
+        ('finca', 'Finca'),
+        ('chalet', 'Chalet'),
+        ('casa_rural', 'Casa Rural'),
+        ('residencia_universitaria', 'Residencia Universitaria'),
+        ('penthouse', 'Penthouse'),
+        ('granja', 'Granja'),
+        ('hostal', 'Hostal'),
+        ('hotel', 'Hotel'),
+        ('camping', 'Camping'),
+        ('resort', 'Resort'),
+        ('tienda_de_campaña', 'Tienda de Campaña'),
+        ('casa_flotante', 'Casa Flotante'),
+        ('casa_en_arbol', 'Casa en Árbol'),
+        ('domo', 'Domo'),
+        ('yurta', 'Yurta'),
+        ('container', 'Container'),
+        ('apartamento_estudio', 'Apartamento Estudio'),
+        ('aparthotel', 'Aparthotel'),
+    ]
+        
     propietario = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE, limit_choices_to={'tipo_usuario': 'anfitrion'})
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
@@ -18,11 +52,17 @@ class Propiedad(models.Model):
     num_maximo_huespedes = models.IntegerField()
     num_maximo_habitaciones = models.IntegerField()
     servicios_disponibles = models.TextField()
+    tipo = models.CharField(max_length=50, choices=TIPO_PROPIEDAD_CHOICES)  # Campo con opciones predefinidas
 
 
     def __str__(self):
         return self.titulo
     
+    def obtener_promedio_calificacion(self):
+        valoraciones = self.valoraciones.all()
+        if not valoraciones.exists():
+            return None  # O puedes devolver 0, dependiendo de cómo quieras manejarlo
+        return valoraciones.aggregate(models.Avg('calificacion'))['calificacion__avg']
 
     def clean(self):
         super().clean()
@@ -52,7 +92,7 @@ class Disponibilidad(models.Model):
         return f"{self.propiedad.titulo} - {self.fecha}"
     
     def clean(self):
-        super.clean()
+        super().clean()
         
         # Validación: La fecha no debe ser anterior a la actual
         if self.fecha < now().date():
@@ -121,3 +161,19 @@ class PropiedadesDeseadas(models.Model):
 
     def str(self):
         return f"{', '.join([str(p) for p in self.propiedad.all()])} - {', '.join([i.usuario.nombre for i in self.inquilino.all()])}"
+
+class Valoracion(models.Model):
+    propiedad = models.ForeignKey(Propiedad, on_delete=models.CASCADE, related_name='valoraciones')
+    usuario = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE, related_name='valoraciones')
+    calificacion = models.PositiveSmallIntegerField()  # Por ejemplo, de 1 a 5
+
+    class Meta:
+        unique_together = ('propiedad', 'usuario')  # Un usuario solo puede valorar una propiedad una vez
+
+    def __str__(self):
+        return f"{self.usuario} valoró {self.propiedad} con {self.calificacion} estrellas"
+
+    def clean(self):
+        super().clean()
+        if self.calificacion < 1 or self.calificacion > 5:
+            raise ValidationError("La calificación debe estar entre 1 y 5.")

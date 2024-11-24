@@ -21,7 +21,7 @@ ImagenFormSet = inlineformset_factory(
 class PropiedadForm(forms.ModelForm):
     class Meta:
         model = Propiedad
-        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'num_maximo_huespedes', 'num_maximo_habitaciones', 'servicios_disponibles']
+        fields = ['titulo', 'descripcion', 'ubicacion', 'precio_por_noche', 'num_maximo_huespedes', 'num_maximo_habitaciones', 'servicios_disponibles', 'tipo']
 
 class FiltroAlojamientosForm(forms.Form):
     query = forms.CharField()
@@ -30,6 +30,8 @@ class FiltroAlojamientosForm(forms.Form):
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
     num_maximo_huespedes = forms.IntegerField(required=False, label="Número de huéspedes")
     num_maximo_habitaciones = forms.IntegerField(required=False, label="Número de habitaciones")
+    tipo = forms.CharField(required=False, label="Tipo")
+    valoracion_minima = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Valoración mínima")
 
 class FiltroAlojamientosHomeForm(forms.Form):
     ubicacion = forms.CharField(required=False, label="Ubicación")
@@ -37,6 +39,8 @@ class FiltroAlojamientosHomeForm(forms.Form):
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
     num_maximo_huespedes = forms.IntegerField(required=False, label="Número de huéspedes")
     num_maximo_habitaciones = forms.IntegerField(required=False, label="Número de habitaciones")
+    tipo = forms.CharField(required=False, label="Tipo")
+    valoracion_minima = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Valoración mínima")
 
 
 class ReservaForm(forms.ModelForm):
