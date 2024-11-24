@@ -19,14 +19,30 @@
                     <form method="GET" action="{% url 'home' %}" class="dropdown-menu p-4"
                         aria-labelledby="filterDropdown" style="width: 100%;">
                         <div class="mb-3">
+                            <label for="ubicacion" class="form-label">Ubicación:</label>
+                            <input type="text" id="ubicacion" name="ubicacion" step="0.01" min="0" class="form-control">
+                        </div>
+                        <div class="mb-3">
                             <label for="precio_min" class="form-label">Precio mínimo:</label>
                             <input type="number" id="precio_min" name="precio_min" step="0.01" min="0"
                                 class="form-control">
                         </div>
+
                         <div class="mb-3">
                             <label for="precio_max" class="form-label">Precio máximo:</label>
                             <input type="number" id="precio_max" name="precio_max" step="0.01" min="0"
                                 class="form-control">
+
+                        </div>
+                        <div class="mb-3">
+                            <label for="num_maximo_huespedes" class="form-label">Número de huéspedes:</label>
+                            <input type="number" id="num_maximo_huespedes" name="num_maximo_huespedes" step="1"
+                                min="0" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="num_maximo_habitaciones" class="form-label">Número de habitaciones:</label>
+                            <input type="number" id="num_maximo_habitaciones" name="num_maximo_habitaciones" step="1"
+                                min="0" class="form-control">
                         </div>
                         <!-- Botón "Aplicar Filtros" para enviar el formulario -->
                         <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
@@ -44,16 +60,19 @@
                 <div class="row row-cols-1 row-cols-md-3 g-4 d-flex justify-content-left">
                     {% for resultado in resultados %}
                     <div class="col d-flex align-items-stretch">
-                        <a href="{% url 'mostrar_propiedad' resultado.propiedad.id %}" class="text-decoration-none text-dark w-100">
+                        <a href="{% url 'mostrar_propiedad' resultado.propiedad.id %}"
+                            class="text-decoration-none text-dark w-100">
                             <div class="card h-100 mb-4">
                                 <div class="position-relative">
                                     <!-- Imagen de la propiedad -->
                                     {% if resultado.propiedad.imagenes.first.imagen.url %}
                                     <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top"
-                                        alt="{{ resultado.propiedad.titulo }}" style="height: 200px; object-fit: cover;">
+                                        alt="{{ resultado.propiedad.titulo }}"
+                                        style="height: 200px; object-fit: cover;">
                                     {% endif %}
                                     <!-- Badge -->
-                                    <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2 position-absolute top-0 end-0 m-2">
+                                    <span
+                                        class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2 position-absolute top-0 end-0 m-2">
                                         {{ resultado.dias_disponibles }} días disponibles
                                     </span>
                                 </div>
@@ -63,7 +82,8 @@
                                         <i class="fas fa-map-marker-alt me-2"></i>{{ resultado.propiedad.ubicacion }}
                                     </p>
                                     <p class="card-text text-muted" style="font-size: 0.85rem;">
-                                        <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }} €/noche
+                                        <i class="fas fa-money-bill me-2"></i>{{ resultado.propiedad.precio_por_noche }}
+                                        €/noche
                                     </p>
                                 </div>
                             </div>
@@ -71,11 +91,23 @@
                     </div>
                     {% endfor %}
                 </div>
-                
+
                 {% else %}
                 <p class="text-danger">No se encontraron resultados.</p>
                 {% endif %}
+
+
             </div>
+            {% if messages %}
+            <div class="container mt-4">
+                {% for message in messages %}
+                <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

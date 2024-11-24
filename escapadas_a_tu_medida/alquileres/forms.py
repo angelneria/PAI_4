@@ -25,12 +25,18 @@ class PropiedadForm(forms.ModelForm):
 
 class FiltroAlojamientosForm(forms.Form):
     query = forms.CharField()
+    ubicacion = forms.CharField(required=False, label="Ubicación")
     precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
+    num_maximo_huespedes = forms.IntegerField(required=False, label="Número de huéspedes")
+    num_maximo_habitaciones = forms.IntegerField(required=False, label="Número de habitaciones")
 
 class FiltroAlojamientosHomeForm(forms.Form):
+    ubicacion = forms.CharField(required=False, label="Ubicación")
     precio_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio mínimo")
     precio_max = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Precio máximo")
+    num_maximo_huespedes = forms.IntegerField(required=False, label="Número de huéspedes")
+    num_maximo_habitaciones = forms.IntegerField(required=False, label="Número de habitaciones")
 
 
 class ReservaForm(forms.ModelForm):

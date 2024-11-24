@@ -62,7 +62,7 @@
                 if (stripeError) {
                     alert(stripeError.message);
                 } else if (paymentIntent.status === 'succeeded') {
-                    alert('Pago realizado con éxito. Reserva confirmada.');
+
                     // Redirige a la página de confirmación de la reserva
                     window.location.href = `/pagoRealizado`;
                 }

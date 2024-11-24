@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Detalles de tu Reserva</h1>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4 class="card-title">{{ reserva.propiedad.titulo }}</h4>
+            <p class="card-text"><strong>Ubicación:</strong> {{ reserva.propiedad.ubicacion }}</p>
+            <p class="card-text"><strong>Descripción:</strong> {{ reserva.propiedad.descripcion }}</p>
+            <p class="card-text"><strong>Fechas reservadas:</strong> 
+                {% for fecha in reserva.fechas_reserva %}
+                    {{ fecha }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <p class="card-text"><strong>Número de huéspedes:</strong> {{ reserva.numero_huespedes }}</p>
+            <p class="card-text"><strong>Total pagado:</strong> {{ reserva.total }} €</p>
+        </div>
+    </div>
+    <a href="/" class="btn btn-primary mt-3">Volver al Inicio</a>
+</div>
+{% endblock %}

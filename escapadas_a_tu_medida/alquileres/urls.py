@@ -17,6 +17,7 @@ urlpatterns = [
     path('gestionPropiedad/show/<int:propiedad_id>/', views.mostrar_detalles_propiedad, name='mostrar_propiedad'),
     path('gestionPropiedad/', views.listar_propiedades_propietario, name='listar_propiedades_propietario'),
     path('historialReservas/', views.historial_reservas, name='historial_reservas'),
+    path('seguimientoReservas/<int:reserva_id>/', views.seguir_reservas, name='seguir_reservas'),
     path('agregarListaDeseos/<int:propiedad_id>/', views.agregar_propiedad_deseada, name='agregar_lista_deseos'),
     path('listaDeseos/', views.obtener_lista_deseos, name='lista_deseos'),
     path('eliminarListaDeseos/<int:propiedad_id>/', views.eliminar_de_lista_deseos, name='eliminar_lista_deseos'),

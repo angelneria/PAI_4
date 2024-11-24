@@ -230,10 +230,7 @@
             $('#chat-message-send').off('click').on('click', function () {
                 const message = $('#chat-message-input').val();
 
-                if (!message) {
-                    alert("Se requiere un mensaje.");
-                    return;
-                }
+
 
                 $.ajax({
                     url: `/chat/${roomName}/send/`,

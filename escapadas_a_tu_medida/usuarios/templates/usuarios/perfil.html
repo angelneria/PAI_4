@@ -90,13 +90,15 @@
             background-color: #007bff;
             color: #fff;
             border-radius: 8px;
-            padding: 16px; /* Aumento de padding en el botón */
-            font-size: 18px; /* Botón más grande */
+            padding: 16px;
+            /* Aumento de padding en el botón */
+            font-size: 18px;
+            /* Botón más grande */
             font-weight: 700;
             width: 100%;
             transition: background-color 0.3s ease;
             outline: none;
-            border:none;
+            border: none;
         }
 
         .btn-custom:hover {
@@ -146,7 +148,8 @@
             <h2>Editar Perfil</h2>
             <form method="post">
                 {% csrf_token %}
-                {{ form.as_p }}
+                {{ form_user.as_p }}
+                {{ form_perfil.as_p }}
                 <p>
                     Nota: si deseas cambiar tanto tu correo como tu contraseña,
                     primero debes actualizar tu correo electrónico y guardar los cambios.
@@ -159,13 +162,7 @@
                 <a href="{{ cambio_contrasena_url }}">Haz clic aquí</a> para recibir un correo electrónico con las
                 instrucciones.
             </p>
-            {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-            {% endif %}
+           
         </div>
     </div>
 </body>

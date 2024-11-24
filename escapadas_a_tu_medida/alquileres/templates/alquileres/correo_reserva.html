@@ -34,7 +34,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>¡Hola, {{ reserva.inquilino.nombre }}!</h1>
+        <h1>¡Hola, {{ usuario}}!</h1>
         <p>Gracias por tu reserva en <strong>{{ reserva.propiedad.titulo }}</strong>. Aquí están los detalles:</p>
 
         <div class="info">
@@ -46,8 +46,12 @@
                 {% endfor %}
             </p>
             <p><strong>Número de huéspedes:</strong> {{ reserva.numero_huespedes }}</p>
-            <p><strong>Total a pagar:</strong> ${{ reserva.total }}</p>
+            <p><strong>Total a pagar:</strong> {{ reserva.total }} €</p>
         </div>
+
+        <p>Para hacer el seguimiento de tu reserva, haz clic en el siguiente enlace:</p>
+        <p><a href="{{url_seguimiento}}">Seguir mi reserva</a></p>
+    
 
         <p>Estamos emocionados de recibirte pronto. Si tienes alguna pregunta, no dudes en contactarnos.</p>
 
