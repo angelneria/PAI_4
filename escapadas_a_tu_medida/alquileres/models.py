@@ -92,7 +92,7 @@ class Disponibilidad(models.Model):
         return f"{self.propiedad.titulo} - {self.fecha}"
     
     def clean(self):
-        super.clean()
+        super().clean()
         
         # Validación: La fecha no debe ser anterior a la actual
         if self.fecha < now().date():
