@@ -374,6 +374,8 @@ def crear_propiedad(request):
         else:
             # Aquí manejamos el caso en que el formulario no es válido
             imagen_formset = ImagenFormSet()  # Reasignar por coherencia en el flujo
+            return render(request, 'alquileres/crear_propiedad.html', {'form': propiedad_form})
+
 
     else:
         propiedad_form = PropiedadForm()
