@@ -22,6 +22,7 @@ class PropiedadModelTest(TestCase):
             precio_por_noche=100.00,
             num_maximo_huespedes=2,
             num_maximo_habitaciones=1,
+            tipo = 'apartamento',
             servicios_disponibles='Test Servicios'
         )
 
@@ -37,6 +38,8 @@ class PropiedadModelTest(TestCase):
         self.assertEqual(propiedad.num_maximo_huespedes, 2)
         self.assertEqual(propiedad.num_maximo_habitaciones, 1)
         self.assertEqual(propiedad.servicios_disponibles, "Test Servicios")
+        self.assertEqual(propiedad.tipo, "apartamento")
+
 
 
     def test_validacion_precio_positivo(self):
@@ -108,3 +111,60 @@ class PropiedadModelTest(TestCase):
             propiedad3.full_clean()
         self.assertIn("La propiedad tiene fechas de disponibilidad anteriores a la actual.", str(e.exception))
 
+
+
+
+    def test_tipo_propiedad_valida(self):
+            
+            propietario = PerfilUsuario.objects.create(
+                usuario= User.objects.create_user(username='testuser', password='testpassword'),
+                tipo_usuario='anfitrion',
+                telefono='1234567890'
+            )
+
+
+            # Crear una propiedad con un tipo válido
+            propiedad = Propiedad(
+                propietario=propietario,
+                titulo="Propiedad de prueba",
+                descripcion="Descripción de prueba",
+                ubicacion="Ubicación de prueba",
+                precio_por_noche=100.00,
+                num_maximo_huespedes=4,
+                num_maximo_habitaciones=2,
+                servicios_disponibles="Wifi, Piscina",
+                tipo="apartamento"  # Tipo válido
+            )
+            try:
+                propiedad.full_clean()  # Validar los datos del modelo
+                propiedad.save()
+            except ValidationError:
+                self.fail("La propiedad con tipo válido no debería generar un error")
+
+            # Verificar que la propiedad se guardó correctamente
+            self.assertEqual(Propiedad.objects.count(), 1)
+            self.assertEqual(Propiedad.objects.first().tipo, "apartamento")
+
+    def test_tipo_propiedad_invalido(self):
+            # Crear una propiedad con un tipo no válido
+
+            propietario = PerfilUsuario.objects.create(
+                usuario= User.objects.create_user(username='testuser', password='testpassword'),
+                tipo_usuario='anfitrion',
+                telefono='1234567890'
+            )
+
+
+            propiedad = Propiedad(
+                propietario=propietario,
+                titulo="Propiedad de prueba",
+                descripcion="Descripción de prueba",
+                ubicacion="Ubicación de prueba",
+                precio_por_noche=100.00,
+                num_maximo_huespedes=4,
+                num_maximo_habitaciones=2,
+                servicios_disponibles="Wifi, Piscina",
+                tipo="casa_flotante_invalida"  # Tipo no válido
+            )
+            with self.assertRaises(ValidationError):
+                propiedad.full_clean()  # Esto debería lanzar un ValidationError
