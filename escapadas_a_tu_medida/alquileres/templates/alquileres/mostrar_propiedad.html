@@ -154,6 +154,32 @@
             margin-top: 8px;
             /* Espaciado entre el título y el calendario */
         }
+
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .rating input {
+            display: none;
+            /* Ocultar los radios */
+        }
+
+        .rating label {
+            font-size: 2rem;
+            color: gray;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        /* Cambiar color al pasar el mouse */
+        .rating label:hover,
+        .rating label:hover~label,
+        .rating input:checked~label {
+            color: gold;
+        }
     </style>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -191,7 +217,8 @@
             <div class="btn-container mt-3"> <!-- Se añadió mt-5 para mayor separación -->
                 <form action="{% url 'crear_reserva' resultado.id %}" method="POST">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-warning btn-lg btn-agregar-deseos w-100"> <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
+                    <button type="submit" class="btn btn-warning btn-lg btn-agregar-deseos w-100">
+                        <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
                         <i class="fas fa-calendar-alt me-2"></i> Pasar a reserva
                     </button>
                 </form>
@@ -202,7 +229,8 @@
             <div class="btn-container mt-5"> <!-- Se añadió mt-5 para mayor separación -->
                 <form action="{% url 'agregar_lista_deseos' resultado.id %}" method="POST">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-lg btn-agregar-deseos w-100 mb-5"> <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
+                    <button type="submit" class="btn btn-success btn-lg btn-agregar-deseos w-100 mb-5">
+                        <!-- btn-lg y w-100 para hacerlo más grande y ancho -->
                         <i class="fas fa-check-circle me-2"></i> Añadir a la lista de deseos
                     </button>
                 </form>
@@ -210,15 +238,16 @@
             {% else %}
             <div class="alert alert-success mt-3" role="alert">
                 <i class="fas fa-check-circle me-2"></i> ¡Ya has añadido esta propiedad a tu lista de deseos!
-            </div> 
+            </div>
             {% endif %}
             {% endif %}
         </div>
-        
+
         <!-- Información de la propiedad -->
         <div class="col-md-4">
             <h1>{{ resultado.titulo }}</h1>
             <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>{{ resultado.ubicacion }}</p>
+            <h4>Calificación promedio: {{ resultado.obtener_promedio_calificacion|default:"Sin valoraciones" }}</h4>
             <p class="fs-4 fw-bold text-success">{{ resultado.precio_por_noche }} €/noche</p>
             <p>{{ resultado.descripcion }}</p>
             <ul class="list-group">
@@ -228,14 +257,38 @@
                     {{resultado.num_maximo_habitaciones}}</li>
                 <li class="list-group-item"><strong>Servicios disponibles:</strong> {{resultado.servicios_disponibles}}
                 </li>
+                <li class="list-group-item"><strong>Tipo de vivienda:</strong> {{resultado.tipo}}
+                </li>
             </ul>
-
             <!-- Calendario de disponibilidad -->
             <div id="contenedor-calendario" class="text-center">
                 <h3>Fechas Disponibles</h3>
                 <div id="calendario-disponibilidades"></div>
             </div>
 
+            {% if perfil_usuario.tipo_usuario == 'inquilino' %}
+
+            <form id="form-valoracion" method="POST" action="{% url 'valorar_propiedad' resultado.id %}">
+                {% csrf_token %}
+                <div class="d-flex flex-column align-items-center mt-4">
+                    <!-- Estrellas -->
+                    <div class="rating mb-3">
+                        <input type="radio" id="star5" name="calificacion" value="5" required />
+                        <label for="star5" title="5 estrellas">&#9733;</label>
+                        <input type="radio" id="star4" name="calificacion" value="4" required />
+                        <label for="star4" title="4 estrellas">&#9733;</label>
+                        <input type="radio" id="star3" name="calificacion" value="3" required />
+                        <label for="star3" title="3 estrellas">&#9733;</label>
+                        <input type="radio" id="star2" name="calificacion" value="2" required />
+                        <label for="star2" title="2 estrellas">&#9733;</label>
+                        <input type="radio" id="star1" name="calificacion" value="1" required />
+                        <label for="star1" title="1 estrella">&#9733;</label>
+                    </div>
+                    <!-- Botón -->
+                    <button type="submit" class="btn btn-primary mb-5">Enviar valoración</button>
+                </div>
+            </form>
+            {%endif%}
         </div>
     </div>
 </div>

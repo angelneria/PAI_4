@@ -5,7 +5,7 @@ from .models import Propiedad, Reserva
 from usuarios.models import PerfilUsuario
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Propiedad, Imagen , Disponibilidad , PropiedadesDeseadas
+from .models import Propiedad, Imagen , Disponibilidad , PropiedadesDeseadas, Valoracion
 from django.core.exceptions import PermissionDenied
 from .forms import PropiedadForm, ImagenFormSet, FiltroAlojamientosForm, ReservaForm, FiltroAlojamientosHomeForm
 from django.forms import ValidationError, modelformset_factory
@@ -19,6 +19,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.db.models import Avg
 
 
 
@@ -38,7 +39,8 @@ def home(request):
         precio_max = form.cleaned_data.get('precio_max')
         num_maximo_huespedes = form.cleaned_data.get('num_maximo_huespedes')
         num_maximo_habitaciones = form.cleaned_data.get('num_maximo_habitaciones')
-
+        tipo = form.cleaned_data.get('tipo')
+        valoracion_minima = form.cleaned_data.get('valoracion_minima')
 
         # Filtro por ubicación
         if ubicacion:
@@ -61,6 +63,13 @@ def home(request):
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
 
+        if tipo is not None:
+            propiedades = propiedades.filter(tipo__icontains=tipo)
+        
+        # Filtro por valoración mínima
+        if valoracion_minima is not None:
+            propiedades = propiedades.annotate(promedio_calificacion=Avg('valoraciones__calificacion'))
+            propiedades = propiedades.filter(promedio_calificacion__gte=valoracion_minima)
 
     propiedades_con_disponibilidad = []
     for propiedad in propiedades:
@@ -275,7 +284,8 @@ def buscar_alojamientos(request):
         precio_max = form.cleaned_data.get('precio_max')
         num_maximo_huespedes = form.cleaned_data.get('num_maximo_huespedes')
         num_maximo_habitaciones = form.cleaned_data.get('num_maximo_habitaciones')
-
+        tipo = form.cleaned_data.get('tipo')
+        valoracion_minima = form.cleaned_data.get('valoracion_minima')
 
         # Filtro por ubicación
         if ubicacion:
@@ -297,6 +307,14 @@ def buscar_alojamientos(request):
         # Filtro por precio máximo
         if precio_max is not None:
             propiedades = propiedades.filter(precio_por_noche__lte=precio_max)
+
+        if tipo is not None:
+            propiedades = propiedades.filter(tipo__icontains=tipo)
+        
+        # Filtro por valoración mínima
+        if valoracion_minima is not None:
+            propiedades = propiedades.annotate(promedio_calificacion=Avg('valoraciones__calificacion'))
+            propiedades = propiedades.filter(promedio_calificacion__gte=valoracion_minima)
 
     propiedades_con_disponibilidad = []
     for propiedad in propiedades:
@@ -560,3 +578,29 @@ def seguir_reservas(request, reserva_id):
     return render(request, 'alquileres/seguimiento_reserva.html', {
         'reserva': reserva,
     })
+
+@login_required
+def valorar_propiedad(request, propiedad_id):
+    propiedad = get_object_or_404(Propiedad, id=propiedad_id)
+    usuario = request.user.perfilusuario  # Ajustar según cómo manejes perfiles
+
+    if request.method == "POST":
+        calificacion = int(request.POST.get('calificacion'))
+
+        try:
+            Valoracion.objects.update_or_create(
+                propiedad=propiedad,
+                usuario=usuario,
+                defaults={'calificacion': calificacion},
+            )
+            messages.success(request, "Valoración guardada con éxito.")
+        except ValidationError as e:
+            messages.error(request, f"Error al guardar la valoración: {e}")
+        except Exception as e:
+            messages.error(request, f"Se produjo un error inesperado: {e}")
+
+        # Redirige de vuelta a la página de detalles de la propiedad
+        return redirect('/gestionPropiedad/show/'+str(propiedad.id))
+
+    messages.error(request, "Método no permitido.")
+    return redirect('detalle_propiedad', propiedad_id=propiedad.id)
