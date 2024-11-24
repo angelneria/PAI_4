@@ -44,6 +44,57 @@
                             <input type="number" id="num_maximo_habitaciones" name="num_maximo_habitaciones" step="1"
                                 min="0" class="form-control">
                         </div>
+
+                        <div class="mb-3">
+                            <label for="valoracion_minima" class="form-label">Valoración mínima:</label>
+                            <select id="valoracion_minima" name="valoracion_minima" class="form-control">
+                                <option value="">Seleccione valoración mínima</option>
+                                <option value="1">1 Estrella</option>
+                                <option value="2">2 Estrellas</option>
+                                <option value="3">3 Estrellas</option>
+                                <option value="4">4 Estrellas</option>
+                                <option value="5">5 Estrellas</option>
+                            </select>
+                        </div>
+                    
+                        <!-- Filtro por tipo de propiedad -->
+                        <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo de propiedad:</label>
+                            <select id="tipo" name="tipo" class="form-control">
+                                <option value="">Seleccione tipo de propiedad</option>
+                                <option value="apartamento">Apartamento</option>
+                                <option value="casa">Casa</option>
+                                <option value="habitacion">Habitación</option>
+                                <option value="villa">Villa</option>
+                                <option value="estudio">Estudio</option>
+                                <option value="loft">Loft</option>
+                                <option value="bungalow">Bungalow</option>
+                                <option value="cabaña">Cabaña</option>
+                                <option value="castillo">Castillo</option>
+                                <option value="caravana">Caravana</option>
+                                <option value="barco">Barco</option>
+                                <option value="iglú">Iglú</option>
+                                <option value="finca">Finca</option>
+                                <option value="chalet">Chalet</option>
+                                <option value="casa_rural">Casa Rural</option>
+                                <option value="residencia_universitaria">Residencia Universitaria</option>
+                                <option value="penthouse">Penthouse</option>
+                                <option value="granja">Granja</option>
+                                <option value="hostal">Hostal</option>
+                                <option value="hotel">Hotel</option>
+                                <option value="camping">Camping</option>
+                                <option value="resort">Resort</option>
+                                <option value="tienda_de_campaña">Tienda de Campaña</option>
+                                <option value="casa_flotante">Casa Flotante</option>
+                                <option value="casa_en_arbol">Casa en Árbol</option>
+                                <option value="domo">Domo</option>
+                                <option value="yurta">Yurta</option>
+                                <option value="container">Container</option>
+                                <option value="apartamento_estudio">Apartamento Estudio</option>
+                                <option value="aparthotel">Aparthotel</option>
+                            </select>
+                        </div>
+                        
                         <!-- Botón "Aplicar Filtros" para enviar el formulario -->
                         <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
                     </form>
