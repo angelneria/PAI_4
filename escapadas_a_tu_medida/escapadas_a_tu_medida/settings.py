@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'pago',
 ]
 
-if config('RENDER') == False:
+if config('RENDER', cast=bool) == False:
     MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'escapadas_a_tu_medida.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {}
 
-if config('RENDER') == False:
+if config('RENDER',cast=bool) == False:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
