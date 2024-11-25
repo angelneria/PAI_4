@@ -47,15 +47,26 @@ INSTALLED_APPS = [
     'pago',
 ]
 
-MIDDLEWARE = [
+if DEBUG is True:
+    MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    ]
+else:
+
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
 
 ROOT_URLCONF = 'escapadas_a_tu_medida.urls'
 
@@ -82,7 +93,8 @@ WSGI_APPLICATION = 'escapadas_a_tu_medida.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {}
 
-if DEBUG == True:
+if DEBUG is True:
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
