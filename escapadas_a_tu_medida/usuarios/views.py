@@ -100,6 +100,7 @@ def logout_view(request):
     logout(request)  # Esto cierra solo la sesión del usuario actual
     return redirect('/')  # Redirige a la página principal u otra URL que prefieras
 
+@login_required
 def lista_chats(request):
     # Obtenemos el perfil del usuario logueado
     perfil_usuario = request.user.perfilusuario
@@ -143,6 +144,7 @@ def lista_chats(request):
         'perfil_usuario': perfil_usuario
     })
 
+@login_required
 def chat_view(request, room_name):
     # Parsear el ID del usuario actual y del contacto desde el room_name
     try:
@@ -164,6 +166,7 @@ def chat_view(request, room_name):
         'contact_name': contacto.username,  # Pasar el nombre del contacto al template
     })
 
+@login_required
 def get_messages(request, room_name):
     messages = Message.objects.filter(room=room_name)
     
@@ -177,6 +180,7 @@ def get_messages(request, room_name):
     ]
     return JsonResponse({"messages": data})
 
+@login_required
 @csrf_exempt
 def send_message(request, room_name):
     if request.method == 'POST':

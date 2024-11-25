@@ -55,63 +55,39 @@ class TestInicioSesion(TestCase):
         self.assertRedirects(response, '/')  # Redirige al home
 
 
-# class TestEdicionPerfil(TestCase):
-#     def setUp(self):
-#         self.user = User.objects.create_user(username="usuario", email="usuario@example.com", password="Password123!")
-#         self.client.login(username='usuario', password='Password123!')
+class TestEdicionPerfil(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="usuario", first_name="Nombre", last_name="Apellido", email="usuario@example.com", password="Password123!")
+        PerfilUsuario.objects.create(usuario=self.user, telefono="123456789", tipo_usuario="inquilino")
+        self.client.login(username='usuario', password='Password123!')
 
-#     def test_editar_perfil_valido(self):
-#         url = reverse('editar_perfil')
-#         data = {
-#             'first_name': 'NuevoNombre',
-#             'last_name': 'NuevoApellido',
-#             'email': 'nuevo_email@example.com',
-#         }
-#         response = self.client.post(url, data)
+    def test_editar_perfil_valido(self):
+        url = reverse('editar_perfil')
+        
+        response = self.client.post(url, {
+            "username": "updateduser",
+            "email": "updateduser@example.com",
+            "telefono": "111222333",
+            "tipo_usuario": "inquilino"
+        })
 
-#         # Verificar que el perfil fue editado correctamente
-#         self.assertEqual(response.status_code, 302)  # Redirección al perfil después de editar
-#         self.user.refresh_from_db()
-#         self.assertEqual(self.user.first_name, 'NuevoNombre')
-#         self.assertEqual(self.user.last_name, 'NuevoApellido')
-#         self.assertEqual(self.user.email, 'nuevo_email@example.com')
+        # Verificar que el perfil fue editado correctamente
+        self.assertRedirects(response, '/')
+        self.assertEqual(response.status_code, 302)  # Redirección al perfil después de editar
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'updateduser')
+        self.assertEqual(self.user.perfilusuario.telefono, '111222333')
+        self.assertEqual(self.user.email, 'updateduser@example.com')
 
-# class TestEdicionContraseña(TestCase):
-#     def setUp(self):
-#         data = {
-#             'username': 'nuevo_usuario',
-#             'email': 'nuevo_usuario@example.com',
-#             'first_name': 'Nuevo',
-#             'last_name': 'Usuario',
-#             'password': 'Password123!',
-#             'confirmar_password': 'Password123!',
-#             'telefono': '123456789',
-#             'tipo_usuario': 'inquilino',  # Asegúrate de usar un valor válido del tipo de usuario
-#         }
-#         self.user = User.objects.create_user(data)
-#         self.client.login(username='nuevo_usuario', password='Password123!')
 
-#     def test_editar_contraseña_valida(self):
-#         url = reverse('editar_perfil')  # Asegúrate de usar la URL correcta para cambiar la contraseña
-#         data = {
-#             'password': 'NuevaContraseña123!',
-#             'confirmar_password': 'NuevaContraseña123!',
-#         }
-#         response = self.client.post(url, data)
+class TestRedireccionVista(TestCase):
+    def test_no_acceso_sin_autenticacion(self):
+        # Intentar acceder a la página de perfil sin estar autenticado
+        url = reverse('editar_perfil')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirige a login
 
-#         # Verificar que la contraseña fue cambiada correctamente
-#         self.assertEqual(response.status_code, 302)  # Redirección después de cambiar la contraseña
-#         self.user.refresh_from_db()
-#         self.assertTrue(self.user.check_password('NuevaContraseña123!'))  # Verifica la nueva contraseña
-
-# class TestRedireccionVista(TestCase):
-#     def test_no_acceso_sin_autenticacion(self):
-#         # Intentar acceder a la página de perfil sin estar autenticado
-#         url = reverse('editar_perfil')
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, 302)  # Redirige a login
-
-#         # Intentar acceder a la página de chat sin estar autenticado
-#         url = reverse('lista_chats')
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, 302)  # Redirige a login
+        # Intentar acceder a la página de chat sin estar autenticado
+        url = reverse('lista_chats')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)  # Redirige a login
