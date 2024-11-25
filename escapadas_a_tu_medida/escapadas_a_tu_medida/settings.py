@@ -47,16 +47,6 @@ INSTALLED_APPS = [
     'pago',
 ]
 
-MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ]
-
 if DEBUG is True:
     MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,7 +56,17 @@ if DEBUG is True:
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
+else:
 
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
 
 ROOT_URLCONF = 'escapadas_a_tu_medida.urls'
 
@@ -95,7 +95,7 @@ DATABASES = {}
 
 DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
 
-if DEBUG is True:
+if DEBUG == True:
 
     DATABASES = {
         'default': {
@@ -103,7 +103,9 @@ if DEBUG is True:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
+    
+else:
+    DATABASES['default'] = dj_database_url.parse(config('DATABASE_URL'))
 
 
 
