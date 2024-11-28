@@ -10,6 +10,7 @@
 <body>
     <div class="container">
         <h2 class="mt-5">Procesar Pago para Crear Reserva</h2>
+        <h3>{{ propiedad.titulo }}</h3> 
         <form id="payment-form">
             {% csrf_token %}
             <div class="mb-3">
