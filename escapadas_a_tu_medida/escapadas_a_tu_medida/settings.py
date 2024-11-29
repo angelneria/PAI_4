@@ -55,6 +55,7 @@ if config('RENDER', cast=bool) == False:
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'escapadas_a_tu_medida.middleware.RestringirRutasMiddleware',
     ]
 else:
 
@@ -66,6 +67,7 @@ else:
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'escapadas_a_tu_medida.middleware.RestringirRutasMiddleware',
     ]
 
 ROOT_URLCONF = 'escapadas_a_tu_medida.urls'

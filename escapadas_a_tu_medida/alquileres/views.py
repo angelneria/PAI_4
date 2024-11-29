@@ -195,37 +195,42 @@ def confirmar_reserva(request, propiedad_id):
                 'user_id': request.user.id,
             },
         )
+
+        if request.user.is_authenticated:
+            # Si el usuario está autenticado, usamos su perfil
+            inquilino = request.user.perfilusuario
+            destinatario = inquilino.usuario.email
+            nombre_destinatario = inquilino.usuario.username
+        else:
+            # Si el usuario no está autenticado, usamos "Anonymous" o los datos del formulario
+            inquilino = None    # Puede ser None o una referencia a un "perfil anónimo"
+            destinatario = email_cliente
+            nombre_destinatario = nombre_cliente  
+        if payment_intent.status == 'succeeded':
+        # Aquí ya no es necesario el formulario, creamos la reserva directamente
+            reserva = Reserva(
+                inquilino=inquilino,  # Asocia la reserva al usuario actual
+                propiedad=propiedad,  # Asocia la propiedad seleccionada
+                fechas_reserva=fechas_lista,  # Usa las fechas recuperadas de la sesión
+                numero_huespedes = numero_huespedes,
+                nombre_usuario_anonimo = nombre_cliente,
+                correo_usuario_anonimo = email_cliente,
+                telefono_usuario_anonimo = telefono_cliente,
+            )
+            reserva.save()  # Guarda la reserva en la base de datos
+
+
+
+            asunto = "Confirmación de reserva"
+            propiedad_reservada = reserva.propiedad
+            enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva, request)
     except stripe.error.StripeError as e:
         return JsonResponse({'error': str(e)})
+    
+    except stripe.error.CardError as e:
+        return JsonResponse({'error': str(e)})
 
-    if request.user.is_authenticated:
-        # Si el usuario está autenticado, usamos su perfil
-        inquilino = request.user.perfilusuario
-        destinatario = inquilino.usuario.email
-        nombre_destinatario = inquilino.usuario.username
-    else:
-        # Si el usuario no está autenticado, usamos "Anonymous" o los datos del formulario
-        inquilino = None    # Puede ser None o una referencia a un "perfil anónimo"
-        destinatario = email_cliente
-        nombre_destinatario = nombre_cliente  
-
-    # Aquí ya no es necesario el formulario, creamos la reserva directamente
-    reserva = Reserva(
-        inquilino=inquilino,  # Asocia la reserva al usuario actual
-        propiedad=propiedad,  # Asocia la propiedad seleccionada
-        fechas_reserva=fechas_lista,  # Usa las fechas recuperadas de la sesión
-        numero_huespedes = numero_huespedes,
-        nombre_usuario_anonimo = nombre_cliente,
-        correo_usuario_anonimo = email_cliente,
-        telefono_usuario_anonimo = telefono_cliente,
-    )
-    reserva.save()  # Guarda la reserva en la base de datos
-
-
-
-    asunto = "Confirmación de reserva"
-    propiedad_reservada = reserva.propiedad
-    enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva, request)
+    
 
     return JsonResponse({'clientSecret': payment_intent.client_secret})
 
