@@ -63,7 +63,7 @@ class ReservaViewTests(TestCase):
 
     def test_crear_reserva_view_authenticated(self):
         # Autenticamos al usuario
-        self.client.login(username='usuario', password='testpassword')
+        self.client.login(username='usuario2', password='testpassword')
 
         # Realizamos una reserva
         data = {
@@ -199,7 +199,7 @@ class ReservaViewTests(TestCase):
 
     def test_eliminar_de_lista_deseos(self):
     # Iniciar sesión como el usuario
-        self.client.login(username='usuario', password='testpassword')
+        self.client.login(username='usuario2', password='testpassword')
 
        
         # Realizar la solicitud POST para eliminar la propiedad de la lista de deseos
@@ -216,7 +216,7 @@ class ReservaViewTests(TestCase):
 
 
     def test_valorar_propiedad(self):
-        self.client.login(username='usuario', password='testpassword')
+        self.client.login(username='usuario2', password='testpassword')
         data = {'calificacion': 4}
         response = self.client.post(reverse('valorar_propiedad', args=[self.propiedad.id]), data)
 
@@ -224,6 +224,6 @@ class ReservaViewTests(TestCase):
         self.assertEqual(response.status_code, 302)        
 
         # Verificar que la valoración se ha creado correctamente
-        valoracion = self.propiedad.valoraciones.filter(usuario=self.perfil_usuario)
+        valoracion = self.propiedad.valoraciones.filter(usuario=self.perfil_usuario2)
         self.assertTrue(valoracion.exists())
         self.assertEqual(valoracion.first().calificacion, 4)

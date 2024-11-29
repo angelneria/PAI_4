@@ -8,21 +8,31 @@ class RestringirRutasMiddleware:
         self.get_response = get_response
         # Configura las rutas que quieres proteger
         self.rutas_protegidas = {
-            '^/gestionPropiedad/create$': 'anfitrion',
-            '^/reservar/\d+/$': 'inquilino',
-            '^/confirmar_reserva/\d+/$': 'inquilino',
-            '^/gestionPropiedad/delete/\d+/$': 'anfitrion',
-            '^/gestionPropiedad/update/\d+/$': 'anfitrion',
-            '^/historialReservas': 'anfitrion',
-            '^/seguimientoReservas/\d+/$': 'inquilino',
-            '^/agregarListaDeseos/\d+/$': 'inquilino',
-            '^/eliminarListaDeseos/\d+/$': 'inquilino',
-            '^/listaDeseos': 'inquilino',
-            '^/valorarPropiedad/\d+/$': 'inquilino',
+            '^/gestionPropiedad/create$': ['anfitrion'],
+            '^/reservar/\d+/$': ['inquilino'],
+            '^/confirmar_reserva/\d+/$': ['inquilino'],
+            '^/gestionPropiedad/delete/\d+/$': ['anfitrion'],
+            '^/gestionPropiedad/update/\d+/$': ['anfitrion'],
+            '^/historialReservas': ['anfitrion'],
+            '^/seguimientoReservas/\d+/$': ['inquilino'],
+            '^/agregarListaDeseos/\d+/$': ['inquilino'],
+            '^/eliminarListaDeseos/\d+/$': ['inquilino'],
+            '^/listaDeseos': ['inquilino'],
+            '^/valorarPropiedad/\d+/$': ['inquilino'],
+            '^/pagoRealizado': ['inquilino'],
+            '^/pago': ['inquilino'],
+            '^/perfil': ['inquilino', 'anfitrion'],
+            '^/password_reset': ['inquilino', 'anfitrion'],
+            '^/reset': ['inquilino', 'anfitrion'],
+            '^/chat': ['inquilino', 'anfitrion'],
+
+
+
+
 
         }
 
-        self.rutas_no_autenticado = ['/reservar','/seguimientoReservas']
+        self.rutas_no_autenticado = ['/reservar','/seguimientoReservas', '/confirmar_reserva','/pagoRealizado','/pago' ]
 
     def __call__(self, request):
         # Lógica de restricción
@@ -33,22 +43,24 @@ class RestringirRutasMiddleware:
             rol = perfil_usuario.tipo_usuario  # Solo lo obtenemos si el usuario está autenticado
             for patron, rol_requerido in self.rutas_protegidas.items():
                 if re.match(patron, ruta):  # Compara la ruta con el patrón usando expresiones regulares
-                    if rol != rol_requerido:
+                    if rol not in rol_requerido: 
                         return HttpResponseForbidden(f"Acceso restringido a {rol}.")
-                        
-
         else:
-            if not ruta in self.rutas_no_autenticado:
-                        for patron in self.rutas_protegidas.keys():
-                            if re.match(patron, ruta):
-                                return redirect('/login')  # Si no está autenticado, no intentamos obtener el perfil 
+            # Si el usuario no está autenticado
+            # Verificar si la ruta está en rutas_no_autenticado
+            permitido = any(re.match(patron_no_autenticado, ruta) for patron_no_autenticado in self.rutas_no_autenticado)
+            if not permitido:
+                # Si no está en rutas_no_autenticado, verificar si está en rutas protegidas
+                protegido = any(re.match(patron, ruta) for patron in self.rutas_protegidas)
+                if protegido:
+                    return redirect('/login')
+
+        return self.get_response(request)
+
 
 
                 
 
-
-
-        return self.get_response(request)
 
 
         
