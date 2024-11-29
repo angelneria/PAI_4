@@ -4,6 +4,7 @@ import json
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
+from django.urls import reverse
 from .forms import FormularioEdicionPerfilUsuario, FormularioEdicionUsuario, FormularioRegistroUsuario, FormularioInicioSesion
 from .models import PerfilUsuario, User
 from django.contrib.auth.decorators import login_required
@@ -90,9 +91,13 @@ def editar_perfil(request):
         form_user = FormularioEdicionUsuario(instance=user)
         form_perfil = FormularioEdicionPerfilUsuario(instance=perfil)
 
+    cambio_contrasena_url = reverse('password_reset') + f"?email={user.email}"
+
+
     return render(request, "usuarios/perfil.html", {
         "form_user": form_user,
         "form_perfil": form_perfil,
+        "cambio_contrasena_url": cambio_contrasena_url,
     })
 
 

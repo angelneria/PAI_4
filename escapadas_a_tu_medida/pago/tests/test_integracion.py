@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from alquileres.models import Propiedad, Reserva, Disponibilidad
 from usuarios.models import PerfilUsuario
 from pago.models import Payment
@@ -71,6 +71,13 @@ class TestPagoIntegracion(TestCase):
             status="pending"
         )
 
+        self.fechas_disponibles = [
+            (date.today() + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(5)
+        ]
+        for fecha in self.fechas_disponibles:
+            Disponibilidad.objects.create(propiedad=self.propiedad, fecha=fecha)
+
+        self.fechas_reserva = [self.fechas_disponibles[0]]
         # Configurar variables para los tests
         self.monto = 100.0
         self.procesar_pago_url = reverse('procesar_pago', args=[self.propiedad.id, self.monto])
@@ -108,51 +115,47 @@ class TestPagoIntegracion(TestCase):
         self.assertContains(response, self.propiedad.titulo)  # Cambio: usar 'titulo'
         self.assertContains(response, self.monto)
 
-    @patch('stripe.Webhook.construct_event')
-    def test_webhook_pago_exitoso(self, mock_webhook_construct_event):
-        # Simula una reserva asociada
-        fechas_disponibles = [
-            (date.today() + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(5)
-        ]
-        for fecha in fechas_disponibles:
-            Disponibilidad.objects.create(propiedad=self.propiedad, fecha=fecha)
 
-        fechas_seleccionadas = [fechas_disponibles[0]]  # Selecciona al menos una fecha disponible
-
-        with patch('alquileres.models.Reserva.save') as mocked_save:
-            mocked_save.return_value = None  # Simula que `save()` se ejecuta correctamente
-            reserva = Reserva.objects.create(
-                fechas_reserva=fechas_seleccionadas,
-                numero_huespedes=2,
-                total=200.0,
-                inquilino=self.inquilino2,
-                propiedad=self.propiedad
-            )
-
-        # Simula un evento de webhook
-        mock_webhook_construct_event.return_value = {
-            'type': 'payment_intent.succeeded',
-            'data': {
-                'object': {
-                    'metadata': {'reserva_id': reserva.id}
-                }
-            }
+    @patch('stripe.PaymentIntent.create')
+    @patch('stripe.PaymentIntent.retrieve')
+    def test_pago_y_reserva_exitoso(self, mock_retrieve_payment_intent, mock_create_payment_intent):
+        # Mock para PaymentIntent.create
+        mock_create_payment_intent.return_value = {
+            'id': 'pi_test',
+            'client_secret': 'test_client_secret'
         }
 
-        payload = {
-            "type": "payment_intent.succeeded",
-            "data": {
-                "object": {
-                    "metadata": {
-                        "reserva_id": reserva.id
-                    }
-                }
-            }
-        }
-        payload_json = json.dumps(payload)  # Convierte a JSON
-        sig_header = 'test_signature'
+        # Mock para PaymentIntent.retrieve
+        mock_payment_intent = Mock()
+        mock_payment_intent.id = 'pi_test'
+        mock_payment_intent.status = 'succeeded'
+        mock_retrieve_payment_intent.return_value = mock_payment_intent
 
-        response = self.client.post(reverse('stripe_webhook'), data=payload_json, content_type='application/json', HTTP_STRIPE_SIGNATURE=sig_header)
+        # Configurar sesión
+        session = self.client.session
+        session['fechas_reserva'] = self.fechas_reserva
+        session['numero_huespedes'] = 2
+        session['nombre_cliente'] = 'Juan Pérez'
+        session['email_cliente'] = 'juan.perez@example.com'
+        session['telefono_cliente'] = '123456789'
+        session.save()
 
-        # Verifica que la reserva se actualiza correctamente
-        self.assertEqual(response.status_code, 200)
+        # Solicitar creación de reserva
+        response_reserva = self.client.post(
+            reverse('crear_reserva_ya_pagada', args=[self.propiedad.id]),
+            data={'payment_intent_id': 'pi_test'},
+            content_type='application/json'
+        )
+
+        # Verificar respuesta
+        print(response_reserva.content)  # Para depurar
+        self.assertEqual(response_reserva.status_code, 200)
+        self.assertEqual(response_reserva.json().get('message'), 'Reserva creada exitosamente.')
+
+        # Validar que la reserva fue creada correctamente
+        reserva = Reserva.objects.get(propiedad=self.propiedad)
+        self.assertEqual(reserva.numero_huespedes, 2)
+        self.assertEqual(reserva.nombre_usuario_anonimo, 'Juan Pérez')
+        self.assertEqual(reserva.correo_usuario_anonimo, 'juan.perez@example.com')
+        self.assertEqual(reserva.telefono_usuario_anonimo, '123456789')
+        self.assertEqual(reserva.fechas_reserva, self.fechas_reserva)

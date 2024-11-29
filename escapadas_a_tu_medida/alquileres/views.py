@@ -172,67 +172,92 @@ def enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada
 
 
 def confirmar_reserva(request, propiedad_id):
-    propiedad = Propiedad.objects.get(pk=propiedad_id)
+    if request.method == "POST":
+        propiedad = Propiedad.objects.get(pk=propiedad_id)
 
-    # Recupera las fechas de la sesión
-    fechas_lista = request.session.get('fechas_reserva', [])
-    numero_huespedes = request.session.get('numero_huespedes', None)
-    nombre_cliente = request.session.get('nombre_cliente', None)
-    email_cliente = request.session.get('email_cliente', None)
-    telefono_cliente = request.session.get('telefono_cliente', None)
-    monto = request.session.get('monto', None)
+        monto = request.session.get('monto', None)
+        if not monto:
+            return JsonResponse({'error': 'Monto no proporcionado.'}, status=400)
 
-        # Crea el PaymentIntent en Stripe
-    monto = float(monto)  # Convierte el monto a un valor flotante
-    monto = int(monto * 100)
-    
-    try:
-        payment_intent = stripe.PaymentIntent.create(
-            amount=monto,  # El monto debe estar en centavos (por ejemplo, $10 sería 1000)
-            currency="eur",  # O la moneda que desees usar
-            metadata={
-                'propiedad_id': propiedad_id,
-                'user_id': request.user.id,
-            },
-        )
+        try:
+            # Convertir monto a centavos
+            monto = float(monto)
+            monto = int(monto * 100)
 
-        if request.user.is_authenticated:
-            # Si el usuario está autenticado, usamos su perfil
-            inquilino = request.user.perfilusuario
-            destinatario = inquilino.usuario.email
-            nombre_destinatario = inquilino.usuario.username
-        else:
-            # Si el usuario no está autenticado, usamos "Anonymous" o los datos del formulario
-            inquilino = None    # Puede ser None o una referencia a un "perfil anónimo"
-            destinatario = email_cliente
-            nombre_destinatario = nombre_cliente  
-        if payment_intent.status == 'succeeded':
-        # Aquí ya no es necesario el formulario, creamos la reserva directamente
-            reserva = Reserva(
-                inquilino=inquilino,  # Asocia la reserva al usuario actual
-                propiedad=propiedad,  # Asocia la propiedad seleccionada
-                fechas_reserva=fechas_lista,  # Usa las fechas recuperadas de la sesión
-                numero_huespedes = numero_huespedes,
-                nombre_usuario_anonimo = nombre_cliente,
-                correo_usuario_anonimo = email_cliente,
-                telefono_usuario_anonimo = telefono_cliente,
+            # Crear PaymentIntent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=monto,
+                currency="eur",
+                metadata={
+                    'propiedad_id': propiedad_id,
+                    'user_id': request.user.id
+                },
             )
-            reserva.save()  # Guarda la reserva en la base de datos
+
+            # Enviar el client_secret al frontend para procesar el pago
+            return JsonResponse({'clientSecret': payment_intent.client_secret})
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
 
 
+def crear_reserva_ya_pagada(request, propiedad_id):
+    if request.method == "POST":
+        propiedad = Propiedad.objects.get(pk=propiedad_id)
+
+        # Recuperar datos de la sesión
+        fechas_lista = request.session.get('fechas_reserva', [])
+        numero_huespedes = request.session.get('numero_huespedes', None)
+        nombre_cliente = request.session.get('nombre_cliente', None)
+        email_cliente = request.session.get('email_cliente', None)
+        telefono_cliente = request.session.get('telefono_cliente', None)
+        payment_intent_id = request.POST.get('payment_intent_id', None)
+
+        try:
+            # Verificar el estado del PaymentIntent
+            payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+            if payment_intent.status != 'succeeded':
+                return JsonResponse({'error': 'El pago no se ha completado correctamente.'}, status=400)
+
+            # Crear la reserva
+
+            if request.user.is_authenticated:
+            # Si el usuario está autenticado, usamos su perfil
+                inquilino = request.user.perfilusuario
+                destinatario = inquilino.usuario.email
+                nombre_destinatario = inquilino.usuario.username
+            else:
+                # Si el usuario no está autenticado, usamos "Anonymous" o los datos del formulario
+                inquilino = None    # Puede ser None o una referencia a un "perfil anónimo"
+                destinatario = email_cliente
+                nombre_destinatario = nombre_cliente  
+
+            reserva = Reserva(
+                inquilino=inquilino,
+                propiedad=propiedad,
+                fechas_reserva=fechas_lista,
+                numero_huespedes=numero_huespedes,
+                nombre_usuario_anonimo=nombre_cliente,
+                correo_usuario_anonimo=email_cliente,
+                telefono_usuario_anonimo=telefono_cliente,
+            )
+            reserva.save()
+
+            # Enviar correo de confirmación
             asunto = "Confirmación de reserva"
-            propiedad_reservada = reserva.propiedad
-            enviar_correo(asunto, destinatario, nombre_destinatario, propiedad_reservada, reserva, request)
-    except stripe.error.StripeError as e:
-        return JsonResponse({'error': str(e)})
-    
-    except stripe.error.CardError as e:
-        return JsonResponse({'error': str(e)})
+            destinatario = email_cliente if not inquilino else inquilino.usuario.email
+            nombre_destinatario = nombre_cliente if not inquilino else inquilino.usuario.username
+            enviar_correo(asunto, destinatario, nombre_destinatario, propiedad, reserva, request)
 
-    
-
-    return JsonResponse({'clientSecret': payment_intent.client_secret})
+            return JsonResponse({'message': 'Reserva creada exitosamente.'})
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
 
 @login_required

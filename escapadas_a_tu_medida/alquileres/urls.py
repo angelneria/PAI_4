@@ -7,6 +7,7 @@ from django.conf import settings
 urlpatterns = [
     path('', views.home, name='home'),
     path('reservar/<int:propiedad_id>/', views.crear_reserva, name='crear_reserva'),
+    path('crear_reserva_ya_pagada/<int:propiedad_id>/', views.crear_reserva_ya_pagada, name='crear_reserva_ya_pagada'),
     path('confirmar_reserva/<int:propiedad_id>/', views.confirmar_reserva, name='confirmar_reserva'),
     path('pagoRealizado/', views.pago_realizado, name='pago_realizado'),
     path('buscar/', views.buscar_alojamientos, name='buscar_alojamientos'),
