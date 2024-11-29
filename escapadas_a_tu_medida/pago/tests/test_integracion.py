@@ -5,7 +5,8 @@ from alquileres.models import Propiedad, Reserva, Disponibilidad
 from usuarios.models import PerfilUsuario
 from pago.models import Payment
 from django.contrib.auth.models import User
-from datetime import date
+from datetime import date, timedelta
+import json
 
 
 class TestPagoIntegracion(TestCase):
@@ -78,6 +79,7 @@ class TestPagoIntegracion(TestCase):
     @patch('stripe.PaymentIntent.create')
     def test_procesar_pago_crea_intent(self, mock_payment_intent_create):
         # Simula la creación del PaymentIntent en Stripe
+        
         mock_payment_intent_create.return_value = {
             'client_secret': 'test_client_secret'
         }
@@ -106,4 +108,51 @@ class TestPagoIntegracion(TestCase):
         self.assertContains(response, self.propiedad.titulo)  # Cambio: usar 'titulo'
         self.assertContains(response, self.monto)
 
-   
+    @patch('stripe.Webhook.construct_event')
+    def test_webhook_pago_exitoso(self, mock_webhook_construct_event):
+        # Simula una reserva asociada
+        fechas_disponibles = [
+            (date.today() + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(5)
+        ]
+        for fecha in fechas_disponibles:
+            Disponibilidad.objects.create(propiedad=self.propiedad, fecha=fecha)
+
+        fechas_seleccionadas = [fechas_disponibles[0]]  # Selecciona al menos una fecha disponible
+
+        with patch('alquileres.models.Reserva.save') as mocked_save:
+            mocked_save.return_value = None  # Simula que `save()` se ejecuta correctamente
+            reserva = Reserva.objects.create(
+                fechas_reserva=fechas_seleccionadas,
+                numero_huespedes=2,
+                total=200.0,
+                inquilino=self.inquilino2,
+                propiedad=self.propiedad
+            )
+
+        # Simula un evento de webhook
+        mock_webhook_construct_event.return_value = {
+            'type': 'payment_intent.succeeded',
+            'data': {
+                'object': {
+                    'metadata': {'reserva_id': reserva.id}
+                }
+            }
+        }
+
+        payload = {
+            "type": "payment_intent.succeeded",
+            "data": {
+                "object": {
+                    "metadata": {
+                        "reserva_id": reserva.id
+                    }
+                }
+            }
+        }
+        payload_json = json.dumps(payload)  # Convierte a JSON
+        sig_header = 'test_signature'
+
+        response = self.client.post(reverse('stripe_webhook'), data=payload_json, content_type='application/json', HTTP_STRIPE_SIGNATURE=sig_header)
+
+        # Verifica que la reserva se actualiza correctamente
+        self.assertEqual(response.status_code, 200)
