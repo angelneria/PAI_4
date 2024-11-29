@@ -19,19 +19,10 @@ class RestringirRutasMiddleware:
             '^/eliminarListaDeseos/\d+/$': 'inquilino',
             '^/listaDeseos': 'inquilino',
             '^/valorarPropiedad/\d+/$': 'inquilino',
-            '^/gestionPropiedad/show/\d+/$': 'anfitrion',
-            '^/gestionPropiedad/show/\d+/$': 'inquilino',
 
-
-
-            
-            
-            
-
-            
-            
-            
         }
+
+        self.rutas_no_autenticado = ['/reservar','/seguimientoReservas']
 
     def __call__(self, request):
         # Lógica de restricción
@@ -47,9 +38,13 @@ class RestringirRutasMiddleware:
                         
 
         else:
-            for patron in self.rutas_protegidas.keys():
-                if re.match(patron, ruta):
-                    return redirect('/login')  # Si no está autenticado, no intentamos obtener el perfil 
+            if not ruta in self.rutas_no_autenticado:
+                        for patron in self.rutas_protegidas.keys():
+                            if re.match(patron, ruta):
+                                return redirect('/login')  # Si no está autenticado, no intentamos obtener el perfil 
+
+
+                
 
 
 
