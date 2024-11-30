@@ -40,25 +40,4 @@ def procesar_pago(request, propiedad_id, monto):
 
 
 
-@csrf_exempt
-def stripe_webhook(request):
-    payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
-    endpoint_secret = "tu_webhook_secret"
 
-    try:
-        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-    except ValueError:
-        return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError:
-        return HttpResponse(status=400)
-
-    if event['type'] == 'payment_intent.succeeded':
-        intent = event['data']['object']
-        reserva_id = intent['metadata']['reserva_id']
-        reserva = Reserva.objects.filter(id=reserva_id).first()
-        if reserva:
-            reserva.estado = 'pagada'
-            reserva.save()
-
-    return HttpResponse(status=200)

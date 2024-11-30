@@ -55,6 +55,7 @@ if config('RENDER', cast=bool) == False:
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'escapadas_a_tu_medida.middleware.RestringirRutasMiddleware',
     ]
 else:
 
@@ -66,6 +67,7 @@ else:
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'escapadas_a_tu_medida.middleware.RestringirRutasMiddleware',
     ]
 
 ROOT_URLCONF = 'escapadas_a_tu_medida.urls'
@@ -143,6 +145,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 
 
