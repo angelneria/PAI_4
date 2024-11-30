@@ -146,12 +146,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Para producción
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Para desarrollo (usualmente no es necesario cambiar, pero verifica que esté configurado)
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 
 
 MEDIA_URL = '/media/'
