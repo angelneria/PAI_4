@@ -48,7 +48,6 @@ class TestReservarPropiedad():
     self.driver.find_element(By.CSS_SELECTOR, ".flatpickr-next-month").click()
     self.driver.find_element(By.CSS_SELECTOR, ".flatpickr-next-month").click()
     self.driver.find_element(By.CSS_SELECTOR, ".flatpickr-next-month").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".flatpickr-next-month").click()
     self.driver.find_element(By.CSS_SELECTOR, ".flatpickr-day:nth-child(28)").click()
     self.driver.find_element(By.ID, "fechas_escogidas").send_keys("2025-04-26")
     self.driver.find_element(By.CSS_SELECTOR, ".btn").click()

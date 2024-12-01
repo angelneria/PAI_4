@@ -86,7 +86,7 @@ class PropiedadFormTest(TestCase):
             'num_maximo_habitaciones': 2,
             'servicios_disponibles': 'Calefacción, Wifi',
             'tipo': 'casa',
-            'fechas_disponibles': '2024-12-01, 2024-12-02',
+            'fechas_disponibles': '2025-12-01, 2025-12-02',
         }
         form = PropiedadForm(propiedad_data)
         self.assertTrue(form.is_valid())

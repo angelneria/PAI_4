@@ -11,6 +11,8 @@ import stripe
 from usuarios.models import PerfilUsuario
 from django.core.files.uploadedfile import SimpleUploadedFile
 import tempfile
+from unittest.mock import patch
+
 # Simulamos el pago en Stripe
 stripe.PaymentIntent.create = patch("stripe.PaymentIntent.create", return_value={"client_secret": "test_client_secret"})
 
@@ -67,7 +69,7 @@ class ReservaViewTests(TestCase):
 
         # Realizamos una reserva
         data = {
-            'fechas_escogidas': '2024-12-01, 2024-12-02',
+            'fechas_escogidas': '2025-12-01, 2025-12-02',
             'numero_huespedes': 4,
             'monto': '200.0'
         }
@@ -80,7 +82,7 @@ class ReservaViewTests(TestCase):
     def test_crear_reserva_view_unauthenticated(self):
         # Usuario no autenticado
         data = {
-            'fechas_reserva': '2024-12-01, 2024-12-02',
+            'fechas_reserva': '2025-12-01, 2025-12-02',
             'numero_huespedes': 4,
             'nombre_usuario_anonimo': 'Pepe Antonio',
             'correo_usuario_anonimo': '4o0QI@example.com',
@@ -92,8 +94,12 @@ class ReservaViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
-
-    def test_crear_propiedad_valida(self):
+    @patch('cloudinary.uploader.upload')
+    def test_crear_propiedad_valida(self, mock_upload):
+        mock_upload.return_value = {
+        'url': 'http://res.cloudinary.com/test_image.jpg',
+        'secure_url': 'https://res.cloudinary.com/test_image.jpg',
+    }
         # Iniciar sesión con el usuario anfitrión
         self.client.login(username='usuario', password='testpassword')
 
@@ -107,11 +113,12 @@ class ReservaViewTests(TestCase):
             'num_maximo_habitaciones': 2,
             'servicios_disponibles': 'Calefacción, Wifi',
             'tipo': 'casa',
-            'fechas_disponibles': '2024-12-01, 2024-12-02',
+            'fechas_disponibles': '2025-12-01, 2025-12-02',
         }
 
         # Crear las imágenes a subir (utilizando el archivo de prueba creado)
-        imagenes = [SimpleUploadedFile("test_image.jpg", b"Imagen de prueba", content_type="image/jpeg")]
+        with open('media/navbar.jpg', 'rb') as f:
+            imagenes = [SimpleUploadedFile('navbar.jpg', f.read(), content_type='image/jpeg')]
 
         # Realizar la solicitud POST con los datos del formulario y las imágenes
         response = self.client.post(reverse('crear_propiedad'), {

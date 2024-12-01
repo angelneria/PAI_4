@@ -92,7 +92,7 @@ class UsuarioDjango(HttpUser):
     @task(1)
     def crear_reserva(self):
             # Parámetros para la creación de reserva
-            fechas_escogidas = "2024-12-01, 2024-12-02"  # Fechas seleccionadas para la reserva
+            fechas_escogidas = "2025-12-01, 2025-12-02"  # Fechas seleccionadas para la reserva
             numero_huespedes = 2  # Número de huéspedes
 
             # Realizar la solicitud POST para crear una reserva
@@ -143,7 +143,7 @@ class UsuarioDjango(HttpUser):
         max_habitaciones = 2
 
         # Fechas disponibles (simulando que el propietario pone dos fechas disponibles)
-        fechas_disponibles = "2024-12-01, 2024-12-02"
+        fechas_disponibles = "2025-12-01, 2025-12-02"
 
         # Crear imágenes de prueba (puedes usar imágenes reales si deseas)
         imagenes = [SimpleUploadedFile("test_image.jpg", b"Imagen de prueba", content_type="image/jpeg")]

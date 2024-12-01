@@ -34,9 +34,9 @@ class ReservaModelTest(TestCase):
 
         # Crear disponibilidades para la propiedad
         self.fechas_disponibles = [
-            date(2024, 11, 25),
-            date(2024, 11, 26),
-            date(2024, 11, 27)
+            date(2025, 11, 25),
+            date(2025, 11, 26),
+            date(2025, 11, 27)
         ]
         for fecha in self.fechas_disponibles:
             Disponibilidad.objects.create(
@@ -86,7 +86,7 @@ class ReservaModelTest(TestCase):
                 propiedad=self.propiedad,
                 inquilino=self.perfil_usuario,
                 numero_huespedes=2,
-                fechas_reserva=["2024-11-30"]  # Fecha fuera de las disponibles
+                fechas_reserva=["2025-11-30"]  # Fecha fuera de las disponibles
             )
         self.assertIn("Una o más fechas seleccionadas no están disponibles.", str(context.exception))
 
