@@ -37,7 +37,7 @@
             <div class="card h-100 d-flex flex-column justify-content-between">
                 <!-- Imagen de la propiedad arriba -->
                 {% if propiedad.imagenes.first.imagen.url %}
-                <img src="{{ propiedad.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ propiedad.titulo }}"
+                <img src="{{ propiedad.imagenes.first.imagen }}" class="card-img-top" alt="{{ propiedad.titulo }}"
                     style="height: 300px; object-fit: cover;">
                 {% endif %}
         

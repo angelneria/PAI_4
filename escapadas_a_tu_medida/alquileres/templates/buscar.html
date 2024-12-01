@@ -22,7 +22,7 @@
                 <div class="card">
                     <!-- Imagen de la propiedad arriba -->
                     {% if resultado.propiedad.imagenes.first.imagen.url %}
-                    <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top"
+                    <img src="{{ resultado.propiedad.imagenes.first.imagen }}" class="card-img-top"
                         alt="{{ resultado.propiedad.titulo }}" style="height: 300px; object-fit: cover;">
                     {% endif %}
 

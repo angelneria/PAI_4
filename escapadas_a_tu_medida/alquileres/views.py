@@ -20,7 +20,8 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.db.models import Avg
-
+from cloudinary.uploader import upload
+from cloudinary.exceptions import Error as CloudinaryError
 
 
 def home(request):
@@ -386,7 +387,17 @@ def crear_propiedad(request):
                         raise ValidationError("No puedes subir más de 10 imágenes.")
 
                     for imagen in imagenes:
-                        Imagen.objects.create(propiedad=propiedad, imagen=imagen)
+                        try:
+                            # Subir la imagen a Cloudinary
+                            upload_result = upload(imagen, folder="propiedades/")
+                            # Crear un registro en la base de datos para la imagen
+                            Imagen.objects.create(
+                                propiedad=propiedad,
+                                imagen=upload_result.get("secure_url"),  # Guardar la URL segura de la imagen
+                            )
+                        except CloudinaryError as e:
+                            raise ValidationError(f"Error al subir una imagen: {str(e)}")
+
 
                     # Guardar fechas disponibles
                     if fechas_disponibles:
@@ -468,7 +479,17 @@ def actualizar_propiedad(request, propiedad_id):
 
                     # Guardar nuevas imágenes
                     for imagen in imagenes:
-                        Imagen.objects.create(propiedad=propiedad, imagen=imagen)
+                        try:
+                            # Subir la imagen a Cloudinary
+                            upload_result = upload(imagen, folder="propiedades/")
+                            # Crear un registro en la base de datos para la imagen
+                            Imagen.objects.create(
+                                propiedad=propiedad,
+                                imagen=upload_result.get("secure_url"),  # Guardar la URL segura de la imagen
+                            )
+                        except CloudinaryError as e:
+                            raise ValidationError(f"Error al subir una imagen: {str(e)}")
+
 
                     # Actualizar fechas disponibles
                     nuevas_fechas = set()

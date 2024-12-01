@@ -117,7 +117,7 @@
                                 <div class="position-relative">
                                     <!-- Imagen de la propiedad -->
                                     {% if resultado.propiedad.imagenes.first.imagen.url %}
-                                    <img src="{{ resultado.propiedad.imagenes.first.imagen.url }}" class="card-img-top"
+                                    <img src="{{ resultado.propiedad.imagenes.first.imagen }}" class="card-img-top"
                                         alt="{{ resultado.propiedad.titulo }}"
                                         style="height: 200px; object-fit: cover;">
                                     {% endif %}
