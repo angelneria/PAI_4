@@ -83,8 +83,9 @@ class FormularioEdicionUsuario(forms.ModelForm):
         }
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError("Este correo electrónico ya está en uso.")
+        if email != self.instance.email:
+            if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Este correo electrónico ya está en uso.")
         return email
 
 
