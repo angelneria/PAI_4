@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from django.utils import timezone
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from unittest.mock import patch
 
 class UsuarioDjango(HttpUser):
     wait_time = between(1, 2)  # 1 a 2 segundos entre cada solicitud
@@ -95,6 +96,13 @@ class UsuarioDjango(HttpUser):
             fechas_escogidas = "2025-12-01, 2025-12-02"  # Fechas seleccionadas para la reserva
             numero_huespedes = 2  # Número de huéspedes
 
+            if self.perfil_usuario.tipo_usuario == "anfitrion":
+
+                self.client.post("login/", {
+                    "username": self.user2.username,
+                    "password": 'testpassword',
+                })  
+
             # Realizar la solicitud POST para crear una reserva
             self.client.post(f"reservar/{self.propiedad.id}/", {
                 "fechas_escogidas": fechas_escogidas,
@@ -104,6 +112,13 @@ class UsuarioDjango(HttpUser):
     @task(1)
     def ver_historial_reservas(self):
         # Solicitar el historial de reservas del usuario
+        if self.perfil_usuario2.tipo_usuario == "inquilino":
+
+                self.client.post("login/", {
+                    "username": self.user.username,
+                    "password": 'testpassword',
+                }) 
+
         response = self.client.get("/historialReservas/")
         # Si la respuesta es exitosa (200 OK), seguimos con la simulación
         assert response.status_code == 200
@@ -130,10 +145,26 @@ class UsuarioDjango(HttpUser):
         # Realizar búsqueda sin filtros
         self.client.get("/buscar/")  # Puede cambiar si la URL es distinta
 
+
+    @patch('cloudinary.uploader.upload')
     @task(1)
-    def test_crear_propiedad(self):
+    def test_crear_propiedad(self, mock_upload):
         """Simula la creación de una propiedad con imágenes y fechas disponibles"""
         
+        mock_upload.return_value = {
+            'url': 'http://res.cloudinary.com/test_image.jpg',
+            'secure_url': 'https://res.cloudinary.com/test_image.jpg',
+        }
+        
+        if self.perfil_usuario2.tipo_usuario == "inquilino":
+
+                self.client.post("login/", {
+                    "username": self.user.username,
+                    "password": 'testpassword',
+                })  
+
+
+
         # Crear datos aleatorios para la propiedad
         nombre_propiedad = "Propiedad"
         descripcion = "Una hermosa propiedad para alquilar."
@@ -146,7 +177,8 @@ class UsuarioDjango(HttpUser):
         fechas_disponibles = "2025-12-01, 2025-12-02"
 
         # Crear imágenes de prueba (puedes usar imágenes reales si deseas)
-        imagenes = [SimpleUploadedFile("test_image.jpg", b"Imagen de prueba", content_type="image/jpeg")]
+        with open('media/navbar.jpg', 'rb') as f:
+            imagenes = [SimpleUploadedFile('navbar.jpg', f.read(), content_type='image/jpeg')]
 
         # Preparar datos del formulario
         propiedad_data = {
@@ -187,6 +219,13 @@ class UsuarioDjango(HttpUser):
             tipo = 'apartamento',
             servicios_disponibles='Wifi, Piscina'
         )
+
+        if self.perfil_usuario2.tipo_usuario == "inquilino":
+
+                self.client.post("login/", {
+                    "username": self.user.username,
+                    "password": 'testpassword',
+                }) 
 
         # Crear fechas disponibles para la propiedad
         disponibilidad1 = Disponibilidad.objects.create(
@@ -255,16 +294,22 @@ class UsuarioDjango(HttpUser):
         """Simular la eliminación de una propiedad de la lista de deseos"""
 
         # Obtener el perfil del usuario inquilino
-        perfil_inquilino = self.perfil_usuario2  # user2 es el inquilino
 
+        if self.perfil_usuario.tipo_usuario == "anfitrion":
+
+                self.client.post("login/", {
+                    "username": self.user2.username,
+                    "password": 'testpassword',
+                }) 
         # Crear la relación entre el inquilino y la propiedad en la lista de deseos
         propiedad_deseada = PropiedadesDeseadas.objects.create()
-        propiedad_deseada.inquilino.add(perfil_inquilino)
+        propiedad_deseada.inquilino.add(self.perfil_usuario2)
         propiedad_deseada.propiedad.add(self.propiedad)
+
 
         # Verificar que la relación exista antes de eliminarla
         assert PropiedadesDeseadas.objects.filter(
-            inquilino=perfil_inquilino, propiedad=self.propiedad
+            inquilino=self.perfil_usuario2, propiedad=self.propiedad
         ).exists()
 
         # Simular la eliminación de la propiedad de la lista de deseos

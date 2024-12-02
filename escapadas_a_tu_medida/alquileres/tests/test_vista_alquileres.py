@@ -11,7 +11,6 @@ import stripe
 from usuarios.models import PerfilUsuario
 from django.core.files.uploadedfile import SimpleUploadedFile
 import tempfile
-from unittest.mock import patch
 
 # Simulamos el pago en Stripe
 stripe.PaymentIntent.create = patch("stripe.PaymentIntent.create", return_value={"client_secret": "test_client_secret"})
