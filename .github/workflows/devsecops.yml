@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-          cache: 'pip'  
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -42,6 +42,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Verify Java version
+        run: java -version
+
+      - name: Set JAVA_HOME to Java 17
+        run: |
+          sudo update-alternatives --config java
+          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v1
