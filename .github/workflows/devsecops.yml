@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-          cache: 'pip'
+          cache: 'pip'  
 
       - name: Install dependencies
         run: |
@@ -37,24 +37,14 @@ jobs:
           cd escapadas_a_tu_medida
           python manage.py test
 
-      - name: Install OpenJDK 17 explicitly
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk
-          sudo update-alternatives --config java
-          java -version
-
-      - name: Set JAVA_HOME and SONAR_SCANNER_HOME
-        run: |
-          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          export SONAR_SCANNER_HOME=/opt/sonar-scanner
-          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-          echo "SONAR_SCANNER_HOME=$SONAR_SCANNER_HOME" >> $GITHUB_ENV
-          java -version
-          sonar-scanner -v
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
+        uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: escapadas_a_tu_medida
         env:
