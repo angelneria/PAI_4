@@ -1,6 +1,18 @@
 version: 2
 updates:
+  # Configuración para Python (pip)
   - package-ecosystem: "pip"
-    directory: "/escapadas_a_tu_medida"
+    directory: "/escapadas_a_tu_medida" # Ruta donde está el requirements.txt
     schedule:
-      interval: "daily"
+      interval: "daily"  # Ejecuta las actualizaciones semanalmente
+    open-pull-requests-limit: 5  # Limita el número de PRs abiertas a la vez
+    ignore:
+      - dependency-name: "Django"
+        versions: ["5.x"]  # Evitar actualizaciones a Django 5.x
+    labels:
+      - "dependencies"
+      - "automated"
+    assignees:
+      - "angelneria"  # Reemplaza con tu usuario de GitHub
+    commit-message:
+      prefix: "chore(deps)"  # Prefijo para los mensajes de commit
