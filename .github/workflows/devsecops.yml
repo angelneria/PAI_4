@@ -58,11 +58,17 @@ jobs:
         run: |
           trivy fs --severity HIGH,CRITICAL --ignore-unfixed --format json --output trivy-report.json .
 
-      - name: Create GitHub issue with Trivy report
+      - name: Process and format Trivy report
+        run: |
+          # Extraer vulnerabilidades y formatear en Markdown
+          echo "## Trivy Vulnerability Report" > summary.md
+          echo "### Vulnerabilities Found: " >> summary.md
+          jq -r '.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | "- **Title**: \(.Title)\n  - **Severity**: \(.Severity)\n  - **PkgName**: \(.PkgName)\n  - **Fixed Version**: \(.FixedVersion)\n  - **Description**: \(.Description)\n  - [Link to CVE](\(.PrimaryURL))\n" ' trivy-report.json >> summary.md
+
+      - name: Create GitHub issue with formatted Trivy report
         uses: peter-evans/create-issue-from-file@v4
         with:
           title: "Trivy Vulnerability Report"
-          content-filepath: trivy-report.json
+          content-filepath: summary.md
           labels: security, vulnerability
-
 
