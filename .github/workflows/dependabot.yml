@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/escapadas_a_tu_medida"
+    schedule:
+      interval: "daily"
