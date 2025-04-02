@@ -47,4 +47,22 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.45.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.45.0_Linux-64bit.deb
+
+      - name: Run Trivy scan and save report
+        run: |
+          trivy fs --severity HIGH,CRITICAL --ignore-unfixed --format json --output trivy-report.json .
+
+      - name: Create GitHub issue with Trivy report
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: "Trivy Vulnerability Report"
+          content-filepath: trivy-report.json
+          labels: security, vulnerability
+
 
