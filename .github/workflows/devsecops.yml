@@ -97,7 +97,7 @@ jobs:
           -H "Content-Type: multipart/form-data" \
           -F "engagement=17" \
           -F "scan_type=Trivy Scan" \
-          -F "file=@trivy-report.json"
+          -F "file=@trivy-report.json" \
           -F "auto_reimport=True"
 
 
