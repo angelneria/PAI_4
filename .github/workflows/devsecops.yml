@@ -101,16 +101,3 @@ jobs:
 
           echo "DefectDojo Response: $response"
 
-      - name: Upload Dependabot report to DefectDojo
-        if: success()
-        run: |
-          response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
-            -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-            -H "accept: application/json" \
-            -H "Content-Type: multipart/form-data" \
-            -F "scan_type=Dependency Check Scan" \
-            -F "engagement=17" \
-            -F "test_title=Dependabot Security Report" \
-            -F "file=@$(pwd)/dependabot-report.json")
-
-          echo "DefectDojo Response: $response"
