@@ -55,15 +55,15 @@ jobs:
           -o sonar-report.json
 
 
-      - name: Upload SonarQube report to DefectDojo
+      - name: Reimport SonarQube report to DefectDojo
         run: |
-          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          curl -X POST "https://demo.defectdojo.org/api/v2/reimport-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "engagement=17" \
           -F "scan_type=SonarQube API Import" \
           -F "file=@sonar-report.json" \
-          -F "auto_reimport=True"
+          -F "close_old_findings=True"
 
       - name: Install Trivy
         run: |
@@ -90,15 +90,15 @@ jobs:
           content-filepath: summary.md
           labels: security, vulnerability
 
-      - name: Upload Trivy report to DefectDojo
+      - name: Reimport Trivy report to DefectDojo
         run: |
-          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          curl -X POST "https://demo.defectdojo.org/api/v2/reimport-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "engagement=17" \
           -F "scan_type=Trivy Scan" \
           -F "file=@trivy-report.json" \
-          -F "auto_reimport=True"
+          -F "close_old_findings=True"
 
 
 
