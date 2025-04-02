@@ -44,7 +44,6 @@ jobs:
           args: >
             -Dsonar.projectKey=angelneria_PAI_4
             -Dsonar.organization=angelneria
-            -Dsonar.analysis.mode=preview
             -Dsonar.report.export.path=sonar-report.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
