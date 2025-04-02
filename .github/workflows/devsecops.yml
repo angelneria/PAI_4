@@ -37,15 +37,15 @@ jobs:
           cd escapadas_a_tu_medida
           python manage.py test
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: escapadas_a_tu_medida
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner -X \
+            -Dsonar.projectKey=angelneria_PAI_4 \
+            -Dsonar.organization=angelneria \
+            -Dsonar.projectBaseDir=escapadas_a_tu_medida
+        
