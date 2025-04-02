@@ -38,7 +38,7 @@ jobs:
           python manage.py test
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: sonarqube-scan-action@v5.0.0
         with:
           projectBaseDir: escapadas_a_tu_medida
           args: >
@@ -46,5 +46,6 @@ jobs:
             -Dsonar.organization=angelneria
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
 
