@@ -44,6 +44,8 @@ jobs:
           args: >
             -Dsonar.projectKey=angelneria_PAI_4
             -Dsonar.organization=angelneria
+            -Dsonar.analysis.mode=preview
+            -Dsonar.report.export.path=sonar-report.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -58,60 +60,58 @@ jobs:
         run: |
           trivy fs --severity HIGH,CRITICAL --ignore-unfixed --format json --output trivy-report.json .
 
-      - name: Process and format Trivy report
+      - name: Generate Dependabot Report
         run: |
-          # Extraer vulnerabilidades y formatear en Markdown
-          echo "## Trivy Vulnerability Report" > summary.md
-          echo "### Vulnerabilities Found: " >> summary.md
-          jq -r '.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | "- **Title**: \(.Title)\n  - **Severity**: \(.Severity)\n  - **PkgName**: \(.PkgName)\n  - **Fixed Version**: \(.FixedVersion)\n  - **Description**: \(.Description)\n  - [Link to CVE](\(.PrimaryURL))\n" ' trivy-report.json >> summary.md
+          echo "Running Dependabot Scan..."
+          gh security alert list --repo ${{ github.repository }} --format json > dependabot-report.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create GitHub issue with formatted Trivy report
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          title: "Trivy Vulnerability Report"
-          content-filepath: summary.md
-          labels: security, vulnerability
+      - name: Verify Reports Before Upload
+        run: |
+          echo "Verifying generated reports..."
+          ls -l sonar-report.json || echo "❌ SonarQube report not found!"
+          ls -l trivy-report.json || echo "❌ Trivy report not found!"
+          ls -l dependabot-report.json || echo "❌ Dependabot report not found!"
 
-      - name: Upload SonarQube report to DefectDojo Demo
+      - name: Upload SonarQube report to DefectDojo
+        if: success()
         run: |
           response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
-          -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-          -H "accept: application/json" \
-          -H "Content-Type: multipart/form-data" \
-          -F "scan_type=SonarQube Scan" \
-          -F "engagement=17" \
-          -F "test_title=SonarQube Security Report" \
-          -F "file=@sonar-report.json")
+            -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
+            -H "accept: application/json" \
+            -H "Content-Type: multipart/form-data" \
+            -F "scan_type=SonarQube Scan" \
+            -F "engagement=17" \
+            -F "test_title=SonarQube Security Report" \
+            -F "file=@$(pwd)/sonar-report.json")
 
           echo "DefectDojo Response: $response"
 
-
-      - name: Upload Trivy report to DefectDojo Demo
+      - name: Upload Trivy report to DefectDojo
+        if: success()
         run: |
           response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
-          -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-          -H "accept: application/json" \
-          -H "Content-Type: multipart/form-data" \
-          -F "scan_type=Trivy Scan" \
-          -F "engagement=17" \
-          -F "test_title=Trivy Security Report" \
-          -F "file=@trivy-report.json")
+            -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
+            -H "accept: application/json" \
+            -H "Content-Type: multipart/form-data" \
+            -F "scan_type=Trivy Scan" \
+            -F "engagement=17" \
+            -F "test_title=Trivy Security Report" \
+            -F "file=@$(pwd)/trivy-report.json")
 
           echo "DefectDojo Response: $response"
 
-
-      - name: Upload Dependabot report to DefectDojo Demo
+      - name: Upload Dependabot report to DefectDojo
+        if: success()
         run: |
           response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
-          -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-          -H "accept: application/json" \
-          -H "Content-Type: multipart/form-data" \
-          -F "scan_type=Dependency Check Scan" \
-          -F "engagement=17" \
-          -F "test_title=Dependabot Security Report" \
-          -F "file=@dependabot-report.xml")
+            -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
+            -H "accept: application/json" \
+            -H "Content-Type: multipart/form-data" \
+            -F "scan_type=Dependency Check Scan" \
+            -F "engagement=17" \
+            -F "test_title=Dependabot Security Report" \
+            -F "file=@$(pwd)/dependabot-report.json")
 
           echo "DefectDojo Response: $response"
-
-
-
