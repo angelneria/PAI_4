@@ -41,11 +41,10 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: escapadas_a_tu_medida
+          args: >
+            -Dsonar.projectKey=angelneria_PAI_4
+            -Dsonar.organization=angelneria
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner -X \
-            -Dsonar.projectKey=angelneria_PAI_4 \
-            -Dsonar.organization=angelneria \
-            -Dsonar.projectBaseDir=escapadas_a_tu_medida
-        
+
+
