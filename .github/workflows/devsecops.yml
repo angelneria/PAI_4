@@ -37,28 +37,9 @@ jobs:
           cd escapadas_a_tu_medida
           python manage.py test
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Install SonarScanner
-        run: |
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-          unzip sonar-scanner.zip -d $HOME
-          echo "$HOME/sonar-scanner-4.8.0.2856-linux/bin" >> $GITHUB_PATH
-
-      - name: Verify SonarScanner Installation
-        run: sonar-scanner --version
-
       - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1
+        with:
+          projectBaseDir: escapadas_a_tu_medida
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          cd escapadas_a_tu_medida
-          sonar-scanner -X \
-            -Dsonar.projectKey=angelneria_PAI_4 \
-            -Dsonar.organization=angelneria \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
