@@ -74,38 +74,44 @@ jobs:
 
       - name: Upload SonarQube report to DefectDojo Demo
         run: |
-          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-                "scan_type": "SonarQube Scan",
-                "engagement": 17,
-                "file": "'"$(base64 sonar-report.json)"'",
-                "test_title": "SonarQube Security Report"
-              }'
+          -H "accept: application/json" \
+          -H "Content-Type: multipart/form-data" \
+          -F "scan_type=SonarQube Scan" \
+          -F "engagement=17" \
+          -F "test_title=SonarQube Security Report" \
+          -F "file=@sonar-report.json")
+
+          echo "DefectDojo Response: $response"
+
 
       - name: Upload Trivy report to DefectDojo Demo
         run: |
-          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-                "scan_type": "Trivy Scan",
-                "engagement": 17,
-                "file": "'"$(base64 trivy-report.json)"'",
-                "test_title": "Trivy Security Report"
-              }'
+          -H "accept: application/json" \
+          -H "Content-Type: multipart/form-data" \
+          -F "scan_type=Trivy Scan" \
+          -F "engagement=17" \
+          -F "test_title=Trivy Security Report" \
+          -F "file=@trivy-report.json")
+
+          echo "DefectDojo Response: $response"
+
 
       - name: Upload Dependabot report to DefectDojo Demo
         run: |
-          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          response=$(curl -s -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-                "scan_type": "Dependency Check Scan",
-                "engagement": 17,
-                "file": "'"$(base64 dependabot-report.json)"'",
-                "test_title": "Dependabot Security Report"
-              }'
+          -H "accept: application/json" \
+          -H "Content-Type: multipart/form-data" \
+          -F "scan_type=Dependency Check Scan" \
+          -F "engagement=17" \
+          -F "test_title=Dependabot Security Report" \
+          -F "file=@dependabot-report.xml")
+
+          echo "DefectDojo Response: $response"
+
 
 
