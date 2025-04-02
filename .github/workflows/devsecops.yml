@@ -1,0 +1,41 @@
+name: DevSecOps Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Configura Python
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # Instala dependencias
+      - name: Install dependencies
+        run: |
+          cd escapadas_a_tu_medida
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Configura la base de datos para pruebas
+      - name: Set up database
+        run: |
+          cd escapadas_a_tu_medida
+          python manage.py makemigrations
+          python manage.py migrate
+
+      # Corre los tests
+      - name: Run tests
+        run: |
+          cd escapadas_a_tu_medida
+          python manage.py test
