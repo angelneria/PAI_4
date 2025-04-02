@@ -79,7 +79,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
                 "scan_type": "SonarQube Scan",
-                "engagement": 1,
+                "engagement": 17,
                 "file": "'"$(base64 sonar-report.json)"'",
                 "test_title": "SonarQube Security Report"
               }'
@@ -91,7 +91,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
                 "scan_type": "Trivy Scan",
-                "engagement": 1,
+                "engagement": 17,
                 "file": "'"$(base64 trivy-report.json)"'",
                 "test_title": "Trivy Security Report"
               }'
@@ -103,7 +103,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
                 "scan_type": "Dependency Check Scan",
-                "engagement": 1,
+                "engagement": 17,
                 "file": "'"$(base64 dependabot-report.json)"'",
                 "test_title": "Dependabot Security Report"
               }'
