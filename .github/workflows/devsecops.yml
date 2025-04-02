@@ -39,3 +39,21 @@ jobs:
         run: |
           cd escapadas_a_tu_medida
           python manage.py test
+
+      # Analiza el código con SonarCloud
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          # Instala SonarScanner
+          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+          unzip sonar-scanner-cli.zip -d $HOME
+          export PATH="$HOME/sonar-scanner-4.8.0.2856-linux/bin:$PATH"
+
+          # Ejecuta el análisis
+          cd escapadas_a_tu_medida
+          sonar-scanner \
+            -Dsonar.projectKey=angelneria_PAI_4 \
+            -Dsonar.organization=angelneria \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
