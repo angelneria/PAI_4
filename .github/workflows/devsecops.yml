@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Configura Python
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -19,40 +18,40 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+          cache: 'pip'  
 
-      # Instala dependencias
       - name: Install dependencies
         run: |
           cd escapadas_a_tu_medida
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Configura la base de datos para pruebas
       - name: Set up database
         run: |
           cd escapadas_a_tu_medida
           python manage.py makemigrations
           python manage.py migrate
 
-      # Corre los tests
       - name: Run tests
         run: |
           cd escapadas_a_tu_medida
           python manage.py test
 
-      # Analiza el código con SonarCloud
+      - name: Install SonarScanner
+        run: |
+          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+          unzip sonar-scanner.zip -d $HOME
+          echo "$HOME/sonar-scanner-4.8.0.2856-linux/bin" >> $GITHUB_PATH
+
+      - name: Verify SonarScanner Installation
+        run: sonar-scanner --version
+
       - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # Instala SonarScanner
-          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-          unzip sonar-scanner-cli.zip -d $HOME
-          export PATH="$HOME/sonar-scanner-4.8.0.2856-linux/bin:$PATH"
-
-          # Ejecuta el análisis
           cd escapadas_a_tu_medida
-          sonar-scanner \
+          sonar-scanner -X \  # Modo debug para más logs
             -Dsonar.projectKey=angelneria_PAI_4 \
             -Dsonar.organization=angelneria \
             -Dsonar.host.url=https://sonarcloud.io \
