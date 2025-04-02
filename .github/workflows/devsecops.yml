@@ -46,13 +46,14 @@ jobs:
             -Dsonar.organization=angelneria
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
 
-      - name: Download SonarQube report in JSON format
+
+      - name: Download SonarQube security hotspots in JSON format
         run: |
           curl -u "${{ secrets.SONAR_TOKEN }}:" \
-          "https://sonarcloud.io/api/issues/search?componentKeys=angelneria_PAI_4&resolved=false&types=VULNERABILITY" \
+          "https://sonarcloud.io/api/hotspots/search?projectKey=angelneria_PAI_4" \
           -o sonar-report.json
+
 
       - name: Upload SonarQube report to DefectDojo
         run: |
@@ -61,7 +62,8 @@ jobs:
           -H "Content-Type: multipart/form-data" \
           -F "engagement=17" \
           -F "scan_type=SonarQube API Import" \
-          -F "file=@sonar-report.json"
+          -F "file=@sonar-report.json" \
+          -F "auto_reimport=True"
 
       - name: Install Trivy
         run: |
@@ -96,6 +98,8 @@ jobs:
           -F "engagement=17" \
           -F "scan_type=Trivy Scan" \
           -F "file=@trivy-report.json"
+          -F "auto_reimport=True"
+
 
 
 
