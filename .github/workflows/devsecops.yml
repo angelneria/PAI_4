@@ -51,7 +51,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd escapadas_a_tu_medida
-          sonar-scanner -X \  # Modo debug para más logs
+          sonar-scanner -X \
             -Dsonar.projectKey=angelneria_PAI_4 \
             -Dsonar.organization=angelneria \
             -Dsonar.host.url=https://sonarcloud.io \
