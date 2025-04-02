@@ -120,7 +120,7 @@ jobs:
 
       - name: Reimport SonarQube report to DefectDojo
         run: |
-          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          curl -X POST "https://demo.defectdojo.org/api/v2/reimport-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "engagement=17" \
