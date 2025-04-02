@@ -46,6 +46,22 @@ jobs:
             -Dsonar.organization=angelneria
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
+
+      - name: Download SonarQube report in JSON format
+        run: |
+          curl -u "${{ secrets.SONAR_TOKEN }}:" \
+          "https://sonarcloud.io/api/issues/search?componentKeys=angelneria_PAI_4&resolved=false&types=VULNERABILITY" \
+          -o sonar-report.json
+
+      - name: Upload SonarQube report to DefectDojo
+        run: |
+          curl -X POST "https://demo.defectdojo.org/api/v2/import-scan/" \
+          -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
+          -H "Content-Type: multipart/form-data" \
+          -F "engagement=17" \
+          -F "scan_type=SonarQube API Import" \
+          -F "file=@sonar-report.json"
 
       - name: Install Trivy
         run: |
