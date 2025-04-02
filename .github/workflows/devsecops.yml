@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-          cache: 'pip'  
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -47,13 +47,76 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-
       - name: Download SonarQube security hotspots in JSON format
         run: |
           curl -u "${{ secrets.SONAR_TOKEN }}:" \
           "https://sonarcloud.io/api/hotspots/search?projectKey=angelneria_PAI_4" \
           -o sonar-report.json
 
+      - name: Create transformation script for SonarCloud JSON
+        run: |
+          cat << 'EOF' > transform_sonar.py
+          #!/usr/bin/env python3
+          import json
+          import sys
+          from datetime import datetime
+
+          def map_severity(prob):
+              mapping = {
+                  "HIGH": "High",
+                  "MEDIUM": "Medium",
+                  "LOW": "Low"
+              }
+              return mapping.get(prob.upper(), "Info")
+
+          def extract_file_path(component):
+              if ":" in component:
+                  return component.split(":", 1)[1]
+              return component
+
+          def main(input_file, output_file):
+              with open(input_file, 'r', encoding='utf-8') as f:
+                  data = json.load(f)
+              findings = []
+              for hotspot in data.get("hotspots", []):
+                  title = f"{hotspot.get('message', '').strip()} - {hotspot.get('ruleKey', '')}"
+                  description = (
+                      f"Componente: {hotspot.get('component', '')}\n"
+                      f"Línea: {hotspot.get('line', '')}\n"
+                      f"Mensaje: {hotspot.get('message', '')}\n"
+                      f"Fecha de creación: {hotspot.get('creationDate', '')}\n"
+                      f"Fecha de actualización: {hotspot.get('updateDate', '')}"
+                  )
+                  creation_date = hotspot.get("creationDate", "")
+                  try:
+                      dt = datetime.fromisoformat(creation_date)
+                      date_str = dt.strftime("%Y-%m-%d")
+                  except Exception:
+                      date_str = creation_date
+                  finding = {
+                      "title": title,
+                      "description": description,
+                      "severity": map_severity(hotspot.get("vulnerabilityProbability", "Info")),
+                      "date": date_str,
+                      "file_path": extract_file_path(hotspot.get("component", "")),
+                      "line": hotspot.get("line", None)
+                  }
+                  findings.append(finding)
+              output_json = {"findings": findings}
+              with open(output_file, 'w', encoding='utf-8') as f:
+                  json.dump(output_json, f, indent=2, ensure_ascii=False)
+              print(f"Archivo transformado guardado en {output_file}")
+
+          if __name__ == "__main__":
+              if len(sys.argv) != 3:
+                  print("Uso: python transform_sonar.py <archivo_entrada.json> <archivo_salida.json>")
+                  sys.exit(1)
+              main(sys.argv[1], sys.argv[2])
+          EOF
+          
+      - name: Transform SonarCloud JSON to DefectDojo format
+        run: |
+          python transform_sonar.py sonar-report.json defectdojo_sonar.json
 
       - name: Reimport SonarQube report to DefectDojo
         run: |
@@ -62,7 +125,7 @@ jobs:
           -H "Content-Type: multipart/form-data" \
           -F "engagement=17" \
           -F "scan_type=SonarQube API Import" \
-          -F "file=@sonar-report.json" \
+          -F "file=@defectdojo_sonar.json" \
           -F "close_old_findings=True"
 
       - name: Install Trivy
@@ -78,7 +141,6 @@ jobs:
 
       - name: Process and format Trivy report
         run: |
-          # Extraer vulnerabilidades y formatear en Markdown
           echo "## Trivy Vulnerability Report" > summary.md
           echo "### Vulnerabilities Found: " >> summary.md
           jq -r '.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | "- **Title**: \(.Title)\n  - **Severity**: \(.Severity)\n  - **PkgName**: \(.PkgName)\n  - **Fixed Version**: \(.FixedVersion)\n  - **Description**: \(.Description)\n  - [Link to CVE](\(.PrimaryURL))\n" ' trivy-report.json >> summary.md
@@ -99,7 +161,3 @@ jobs:
           -F "scan_type=Trivy Scan" \
           -F "file=@trivy-report.json" \
           -F "close_old_findings=True"
-
-
-
-
