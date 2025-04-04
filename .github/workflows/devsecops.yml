@@ -59,6 +59,7 @@ jobs:
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "product_name=PAI4" \
+          -F "engagement_name=Pruebas de vulnerabilidades con sonarcloud, trivy y dependabot" \
           -F "engagement=1" \
           -F "scan_type=SonarQube API Import" \
           -F "file=@sonar-report.json" \
@@ -94,7 +95,8 @@ jobs:
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "product_name=PAI4" \
-          -F "engagement=1" \
+          -F "product_name=PAI4" \
+          -F "engagement_name=Pruebas de vulnerabilidades con sonarcloud, trivy y dependabot" \
           -F "scan_type=Trivy Scan" \
           -F "file=@trivy-report.json" \
           -F "close_old_findings=True"
