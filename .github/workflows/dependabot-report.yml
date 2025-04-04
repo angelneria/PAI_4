@@ -47,7 +47,7 @@ jobs:
       - name: Create GitHub issue with Dependabot alerts
         run: |
           echo "## Dependabot Security Alert Report" > dependabot-summary.md
-          jq -r '.[] | "- **Package**: \(.package.name) (\(.package.ecosystem))\n  - **Title**: \(.title)\n  - **Severity**: \(.severity)\n  - **Affected Version**: \(.affected_version)\n  - **Fixed Version**: \(.fixed_version)\n  - **Description**: \(.description)\n  - [Reference](\(.reference))\n"' formatted-dependabot-alerts.json >> dependabot-summary.md
+          jq -r '.findings[] | "- **Package**: \(.package.name) (\(.package.ecosystem))\n  - **Title**: \(.title)\n  - **Severity**: \(.severity)\n  - **Affected Version**: \(.affected_version)\n  - **Fixed Version**: \(.fixed_version)\n  - **Description**: \(.description)\n  - [Reference](\(.reference))\n"' formatted-dependabot-alerts.json >> dependabot-summary.md
 
       - name: Import Dependabot report to DefectDojo
         run: |
