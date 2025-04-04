@@ -29,8 +29,7 @@ jobs:
 
       - name: Format alerts for DefectDojo
         run: |
-          # Creación de un formato compatible con DefectDojo
-          jq '[.[] | {
+          jq '{ findings: [.[] | {
             "title": .security_advisory.summary,
             "description": .security_advisory.description,
             "severity": .security_advisory.severity,
@@ -42,7 +41,8 @@ jobs:
             "fixed_version": .security_advisory.patched_versions,
             "reference": .security_advisory.references[0].url,
             "cvss": .security_advisory.cvss.score
-          }]' dependabot-alerts.json > formatted-dependabot-alerts.json
+          }]}' dependabot-alerts.json > formatted-dependabot-alerts.json
+
 
       - name: Create GitHub issue with Dependabot alerts
         run: |
