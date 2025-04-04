@@ -43,6 +43,9 @@ jobs:
             "cvss": .security_advisory.cvss.score
           }]}' dependabot-alerts.json > formatted-dependabot-alerts.json
 
+      - name: Mostrar formatted-dependabot-alerts.json
+        run: cat formatted-dependabot-alerts.json
+
 
       - name: Create GitHub issue with Dependabot alerts
         run: |
