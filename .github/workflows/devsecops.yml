@@ -50,7 +50,7 @@ jobs:
       - name: Download SonarQube security issues in JSON format
         run: |
           curl -u "${{ secrets.SONAR_TOKEN }}:" \
-          "https://sonarcloud.io/api/issues/search?componentKeys=angelneria_PAI_4" \
+          "https://sonarcloud.io/api/hotspots/search?projectKey=angelneria_PAI_4" \
           -o sonar-report.json
 
       - name: Reimport SonarQube report to DefectDojo
@@ -61,7 +61,7 @@ jobs:
           -F "product_name=PAI4" \
           -F "engagement_name=Pruebas de vulnerabilidades con sonarcloud, trivy y dependabot" \
           -F "engagement=1" \
-          -F "scan_type=SonarQube API Import" \
+          -F "scan_type=SonarQube Scan" \
           -F "file=@sonar-report.json" \
           -F "close_old_findings=True"
 
