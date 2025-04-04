@@ -49,13 +49,6 @@ jobs:
           echo "## Dependabot Security Alert Report" > dependabot-summary.md
           jq -r '.[] | "- **Package**: \(.package.name) (\(.package.ecosystem))\n  - **Title**: \(.title)\n  - **Severity**: \(.severity)\n  - **Affected Version**: \(.affected_version)\n  - **Fixed Version**: \(.fixed_version)\n  - **Description**: \(.description)\n  - [Reference](\(.reference))\n"' formatted-dependabot-alerts.json >> dependabot-summary.md
 
-      - name: Create GitHub issue
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          title: "Dependabot Vulnerability Report"
-          content-filepath: dependabot-summary.md
-          labels: security, dependency, vulnerability
-
       - name: Import Dependabot report to DefectDojo
         run: |
           curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/import-scan/" \
