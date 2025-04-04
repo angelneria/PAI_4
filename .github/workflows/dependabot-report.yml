@@ -32,7 +32,7 @@ jobs:
           jq '{ findings: [.[] | {
             "title": .security_advisory.summary,
             "description": .security_advisory.description,
-            "severity": .security_advisory.severity,
+            "severity": (.security_advisory.severity | . as $s | ($s[0:1] | ascii_upcase) + $s[1:]),
           }]}' dependabot-alerts.json > formatted-dependabot-alerts.json
 
       - name: Mostrar formatted-dependabot-alerts.json
