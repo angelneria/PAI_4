@@ -55,7 +55,7 @@ jobs:
 
       - name: Reimport SonarQube report to DefectDojo
         run: |
-          curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/reimport-scan/" \
+          curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/import-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "product_name=PAI4" \
@@ -91,7 +91,7 @@ jobs:
 
       - name: Reimport Trivy report to DefectDojo
         run: |
-          curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/reimport-scan/" \
+          curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/import-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "product_name=PAI4" \
