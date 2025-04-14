@@ -137,23 +137,23 @@ jobs:
             issue_title="[$severity] $title"
             issue_body="**Description:** $description
 
-**Mitigation:** $mitigation
+            **Mitigation:** $mitigation
 
-**Impact:** $impact
+            **Impact:** $impact
 
-**CVE:** $cve
+            **CVE:** $cve
 
-**DefectDojo URL:** https://bb61-80-31-43-244.ngrok-free.app/finding/$finding_id
-"
+            **DefectDojo URL:** https://bb61-80-31-43-244.ngrok-free.app/finding/$finding_id
+            "
 
-            echo "Creando issue: $issue_title"
+                        echo "Creando issue: $issue_title"
 
-            # Crear la issue en GitHub
-            curl_response=$(curl -s -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              https://api.github.com/repos/angelneria/PAI_4/issues \
-              -d "$(jq -n --arg title "$issue_title" --arg body "$issue_body" --argjson labels '["security", "defectdojo"]' '{title: $title, body: $body, labels: $labels}')")
-            echo "Respuesta de GitHub: $curl_response"
-          done
+                        # Crear la issue en GitHub
+                        curl_response=$(curl -s -X POST \
+                          -H "Authorization: token $GITHUB_TOKEN" \
+                          -H "Accept: application/vnd.github+json" \
+                          https://api.github.com/repos/angelneria/PAI_4/issues \
+                          -d "$(jq -n --arg title "$issue_title" --arg body "$issue_body" --argjson labels '["security", "defectdojo"]' '{title: $title, body: $body, labels: $labels}')")
+                        echo "Respuesta de GitHub: $curl_response"
+                      done
 
