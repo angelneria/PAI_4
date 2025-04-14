@@ -121,7 +121,7 @@ jobs:
           fi
 
           # Obtener los findings activos y verificados del producto
-          FINDINGS_RESPONSE=$(curl -s -H "Authorization: Token $DEFECTDOJO_API_KEY" "https://bb61-80-31-43-244.ngrok-free.app/api/v2/findings/?product_name=PAI4")
+          FINDINGS_RESPONSE=$(curl -s -H "Authorization: Token $DEFECTDOJO_API_KEY" "https://bb61-80-31-43-244.ngrok-free.app/api/v2/findings/?limit=1000&product_name=PAI4")
           echo "Findings obtenidos: $FINDINGS_RESPONSE"
 
           # Iterar por cada finding y crear una issue en GitHub
