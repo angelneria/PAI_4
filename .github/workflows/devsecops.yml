@@ -55,7 +55,7 @@ jobs:
 
       - name: Reimport SonarQube report to DefectDojo
         run: |
-          curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/reimport-scan/" \
+          curl -X POST "https://bb61-80-31-43-244.ngrok-free.app/api/v2/reimport-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "product_name=PAI4" \
@@ -82,16 +82,10 @@ jobs:
           echo "### Vulnerabilities Found: " >> summary.md
           jq -r '.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[] | "- **Title**: \(.Title)\n  - **Severity**: \(.Severity)\n  - **PkgName**: \(.PkgName)\n  - **Fixed Version**: \(.FixedVersion)\n  - **Description**: \(.Description)\n  - [Link to CVE](\(.PrimaryURL))\n" ' trivy-report.json >> summary.md
 
-      - name: Create GitHub issue with formatted Trivy report
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          title: "Trivy Vulnerability Report"
-          content-filepath: summary.md
-          labels: security, vulnerability
 
       - name: Reimport Trivy report to DefectDojo
         run: |
-          curl -X POST "https://1107-80-31-44-98.ngrok-free.app/api/v2/reimport-scan/" \
+          curl -X POST "https://bb61-80-31-43-244.ngrok-free.app/api/v2/reimport-scan/" \
           -H "Authorization: Token ${{ secrets.DEFECTDOJO_API_KEY }}" \
           -H "Content-Type: multipart/form-data" \
           -F "product_name=PAI4" \
@@ -100,3 +94,66 @@ jobs:
           -F "scan_type=Trivy Scan" \
           -F "file=@trivy-report.json" \
           -F "close_old_findings=True"
+
+
+
+      - name: Create GitHub issues for each DefectDojo finding
+        env:
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Instalar jq en caso de que no esté instalado
+          sudo apt-get update && sudo apt-get install -y jq
+
+          # Definir nombre de producto
+          PRODUCT_NAME="PAI4"
+          
+          # Obtener el ID del producto a partir de su nombre
+          PRODUCT_RESPONSE=$(curl -s -H "Authorization: Token $DEFECTDOJO_API_KEY" "https://bb61-80-31-43-244.ngrok-free.app/api/v2/products/?name=${PRODUCT_NAME}")
+          echo "Productos obtenidos: $PRODUCT_RESPONSE"
+          PRODUCT_ID=$(echo "$PRODUCT_RESPONSE" | jq -r '.results[0].id')
+          echo "Product ID: $PRODUCT_ID"
+
+          # Verificar que se obtuvo el ID del producto
+          if [ -z "$PRODUCT_ID" ] || [ "$PRODUCT_ID" == "null" ]; then
+            echo "No se encontró el product_id para el producto '$PRODUCT_NAME'. Verifica que el nombre sea correcto y que la URL de DefectDojo esté activa."
+            exit 1
+          fi
+
+          # Obtener los findings activos y verificados del producto
+          FINDINGS_RESPONSE=$(curl -s -H "Authorization: Token $DEFECTDOJO_API_KEY" "https://bb61-80-31-43-244.ngrok-free.app/api/v2/findings/?product=${PRODUCT_ID}&active=true&verified=true")
+          echo "Findings obtenidos: $FINDINGS_RESPONSE"
+
+          # Iterar por cada finding y crear una issue en GitHub
+          echo "$FINDINGS_RESPONSE" | jq -c '.results[]' | while read -r finding; do
+            title=$(echo "$finding" | jq -r '.title')
+            severity=$(echo "$finding" | jq -r '.severity')
+            description=$(echo "$finding" | jq -r '.description')
+            mitigation=$(echo "$finding" | jq -r '.mitigation // "No mitigation provided."')
+            impact=$(echo "$finding" | jq -r '.impact // "No impact provided."')
+            cve=$(echo "$finding" | jq -r '.cve // "N/A"')
+            finding_id=$(echo "$finding" | jq -r '.id')
+            
+            issue_title="[$severity] $title"
+            issue_body="**Description:** $description
+
+**Mitigation:** $mitigation
+
+**Impact:** $impact
+
+**CVE:** $cve
+
+**DefectDojo URL:** https://bb61-80-31-43-244.ngrok-free.app/finding/$finding_id
+"
+
+            echo "Creando issue: $issue_title"
+
+            # Crear la issue en GitHub
+            curl_response=$(curl -s -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/angelneria/PAI_4/issues \
+              -d "$(jq -n --arg title "$issue_title" --arg body "$issue_body" --argjson labels '["security", "defectdojo"]' '{title: $title, body: $body, labels: $labels}')")
+            echo "Respuesta de GitHub: $curl_response"
+          done
+
