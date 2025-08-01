@@ -1,5 +1,5 @@
 # Usa una imagen oficial de Python
-FROM python:3.12-alpine
+FROM python:3.14.0rc1-alpine
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
